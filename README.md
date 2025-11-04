@@ -51,7 +51,6 @@ You can also support the project with cryptocurrency:
 
 - **Bitcoin:** `bc1qrcdyq2yjgv5alm9kky2e6vyfhnafn3wgd2gjls`
 - **Ethereum:** `0x43b9649985d6789452abe23beb1eb610cee88817`
-- **Monero:** `43qZw2PJ6mS6G1RX63qXV6Lah7vpPHrqGDYotLkheL176CNtYei5anhjXgKDkhJMNx16WFGdtCycyCRSppwTyfeSSQHd42T`
 - **Solana:** `4qK7eSQemRj85VY9CQp5XHRwX5fNjoSJ1ou4gmqk6jtM`
 - **Litecoin:** `ltc1qp6mya23a73n36dc7r0tfwfphn2v53phmhen99j`
 

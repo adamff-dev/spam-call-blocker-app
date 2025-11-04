@@ -162,11 +162,13 @@ class SpamUtils {
                 return@launch
             }
 
-            val isNumberInAgenda = isNumberInAgenda(context, details)
+            if (details != null) {
+                val isNumberInAgenda = isNumberInAgenda(details)
 
-            // Don't check number if is in contacts
-            if (isNumberInAgenda) {
-                return@launch
+                // Don't check number if is in contacts
+                if (isNumberInAgenda) {
+                    return@launch
+                }
             }
 
             if (shouldBlockNonContacts(context)) {
@@ -352,7 +354,7 @@ class SpamUtils {
      * @return true if the number is found in the agenda (has a contact display name),
      *         false otherwise
      */
-    private fun isNumberInAgenda(details): Boolean {
+    private fun isNumberInAgenda(details: Call.Details): Boolean {
         return details.getContactDisplayName() != null
     }
 

@@ -1,138 +1,149 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Spam Call Blocker</string>
-  <string name="success_call_screening_role">ロールコールスクリーニングの要求に成功しました！</string>
-  <string name="failed_call_screening_role">ロールコールスクリーニングの要求に失敗しました</string>
-  <string name="telecom_manager_unavailable">Telecom Manager は利用できません。</string>
-  <string name="call_screening_role_prompt">コールスクリーニングロールを付与してください。</string>
-  <string name="permissions_required_title">必要な権限</string>
-  <string name="permissions_required_message">アプリを正常に動作させるには以下の権限が必要です:\n\n%s\n\nシステム設定を開いて、権限を手動で付与してください。</string>
-  <string name="go_to_settings">設定を開く</string>
-  <string name="permission_read_call_log">通話履歴を読み取り</string>
-  <string name="permission_read_phone_state">電話の状態を読み取り</string>
-  <string name="permission_read_contacts">連絡先の読み取り</string>
-  <string name="permission_answer_phone_calls">電話に出る</string>
-  <string name="permission_post_notifications">通知の投稿</string>
-  <string name="blocked_text_format">%1$s (ブロック済み)</string>
-  <string name="whitelisted_text_format">%1$s (ホワイトリスト)</string>
-  <string name="duration_label">通話時間: %1$d 秒</string>
-  <string name="incoming_call_not_spam">着信はスパムではないようです</string>
-  <string name="notification_channel_name">Spam Call Blocker</string>
-  <string name="notification_title_spam_blocked">着信をブロック済み: %1$s</string>
-  <string name="number_copied_to_clipboard">電話番号をクリップボードにコピーしました</string>
-  <!-- Call types -->
-  <string name="call_incoming">着信</string>
-  <string name="call_missed">不在着信</string>
-  <string name="call_rejected">通話拒否</string>
-  <string name="call_blocked">着信をブロック済み</string>
-  <string name="call_unknown">不明</string>
-  <!-- Preferences -->
-  <string name="action_settings">設定</string>
-  <string name="about">アプリについて</string>
-  <string name="donate">寄付</string>
-  <!-- Preferences Sections -->
-  <string name="pref_category_general_blocking">一般</string>
-  <string name="pref_category_unknown_phone_api">Unknownphone API 🌐</string>
-  <string name="pref_category_tellows_api">Tellows API 🌐</string>
-  <string name="pref_category_truecaller_api">Truecaller API 🌐</string>
-  <string name="pref_category_spam_filters">スパム電話番号のフィルタ</string>
-  <string name="pref_category_other_options">その他のブロックオプション</string>
-  <string name="pref_category_notifications">通知</string>
-  <!-- General Blocking Settings -->
-  <string name="pref_enable_blocking_title">ブロックを有効化</string>
-  <string name="pref_enable_blocking_summary">通話のブロック機能を有効化または無効化します</string>
-  <!-- API Unknownphone -->
-  <string name="pref_filter_lista_spam_title">Unknownphone API</string>
-  <string name="pref_filter_lista_spam_summary">(推奨) unknownphone.com API にリストされているスパムからの着信をブロックします</string>
-  <string name="pref_filter_lista_spam_api_language_title">unknownphone.com API の言語</string>
-  <string name="pref_filter_lista_spam_api_language_summary">unknownphone.com API で検索する言語を選択してください (結果に影響)</string>
-  <!-- API Tellows -->
-  <string name="pref_filter_tellows_title">Tellows API</string>
-  <string name="pref_filter_tellows_summary">(推奨) Tellows API にリストされているスパムからの着信をブロックします</string>
-  <string name="pref_filter_tellows_api_country_title">Tellows API の国</string>
-  <string name="pref_filter_tellows_api_country_summary">Tellows API で検索する国を選択してください (結果に影響)</string>
-  <!-- API Truecaller -->
-  <string name="pref_filter_truecaller_title">Truecaller API</string>
-  <string name="pref_filter_truecaller_summary">(推奨) Truecaller API によって識別されたスパムからの着信をブロックします</string>
-  <string name="pref_filter_truecaller_api_country_title">Truecaller API の国</string>
-  <string name="pref_filter_truecaller_api_country_summary">Truecaller API で検索する国を選択してください (結果に影響)</string>
-  <!-- Other Blocking Options -->
-  <string name="pref_block_non_contacts_title">連絡先に未登録の番号をブロックする</string>
-  <string name="pref_block_non_contacts_summary">連絡先に登録されていない電話番号からの着信をブロックします</string>
-  <string name="pref_block_hidden_numbers_title">非表示の番号をブロックする</string>
-  <string name="pref_block_hidden_numbers_summary">非通知またはプライベート番号からの着信をブロックします</string>
-  <string name="pref_block_international_numbers_title">国際電話をブロックする</string>
-  <string name="pref_block_international_numbers_summary">他国からの着信をブロックします</string>
-  <string name="pref_block_stir_shaken_risk_title">STIR/SHAKEN を確認する</string>
-  <string name="pref_block_stir_shaken_risk_summary">STIR/SHAKEN システムによって不正の可能性があるとマークされた着信をブロックします (Android 11 以降のみ対応、一部の国とキャリアで利用可能)</string>
-  <string name="pref_mute_instead_of_block_title">ブロックの代わりにミュートにする</string>
-  <string name="pref_mute_instead_of_block_summary">スパムからの着信を完全にブロックせずにミュートにします</string>
-  <!-- Notifications -->
-  <string name="pref_show_notification_title">ブロック時に通知を表示する</string>
-  <string name="pref_show_notification_summary">着信がブロックされたときに通知を表示します</string>
-  <!-- Call item actions  -->
-  <string name="open_in_lista_spam_com">ListaSpam を開く</string>
-  <string name="open_in_unknown_phone_com">UnknownPhone を開く</string>
-  <string name="search_in_google">Google で検索</string>
-  <string name="block">ブロック</string>
-  <string name="add_to_whitelist">ホワイトリストに追加</string>
-  <string name="unblock">ブロックを解除</string>
-  <string name="remove_from_whitelist">ホワイトリストから削除</string>
-  <!-- SpamUtils blocking reasons -->
-  <string name="block_reason_long">着信をブロック済み:</string>
-  <string name="block_reason">理由:</string>
-  <string name="blocking_disabled">設定で着信のブロックが無効化されています</string>
-  <string name="block_stir_shaken_risk">STIR/SHAKEN - なりすましの可能性がある着信</string>
-  <string name="block_hidden_number">電話番号が非表示</string>
-  <string name="block_spam_number">スパムとして報告</string>
-  <string name="block_international_call">国際電話</string>
-  <string name="block_already_blocked_number">ブロック済みの電話番号</string>
-  <string name="block_non_contact">連絡先に未登録</string>
-  <string name="export_config">設定とリストをエクスポート</string>
-  <string name="import_config">設定とリストをインポート</string>
-  <string name="test_number">テスト番号</string>
-  <string name="aceptar">受け入れる</string>
-  <string name="cancelar">キャンセル</string>
-  <string name="type_number">有効な電話番号を入力してください</string>
-  <!-- Updates -->
-  <string name="update_available_title">更新が利用可能です</string>
-  <string name="update_available_message">新しいバージョンがあります: %1$s\nダウンロードしますか？</string>
-  <!-- Reports -->
-  <string name="report_title">電話番号を報告する</string>
-  <string name="report_label">理由を説明してください</string>
-  <string name="report_hint">簡単な説明</string>
-  <string name="where_to_report">どこに報告しますか？</string>
-  <string name="report_spam">スパム</string>
-  <string name="report_not_spam">スパムではない</string>
-  <string name="accept">送信</string>
-  <string name="cancel">キャンセル</string>
-  <string name="report_validation_message">少なくとも 2 つの単語と 5 文字を含める必要があります。</string>
-  <string name="report_radio_validation">スパムかどうかを選択してください。</string>
-  <string name="report_success_prefix">報告先</string>
-  <string name="and">と</string>
-  <string name="report_failure">報告を送信できませんでした</string>
-  <string name="select_at_least_one_provider">少なくとも 1 つのプロバイダーを選択してください</string>
-  <string name="reported_to_unknown_phone">UnknownPhone</string>
-  <string name="reported_to_tellows">Tellows</string>
-  <string name="reported_to_truecaller">TrueCaller</string>
-  <string name="truecaller_prefix_repository">TrueCaller (%1$s の接頭辞リポジトリ)</string>
-  <string name="truecaller_default_repository">TrueCaller (デフォルトの接頭辞リポジトリ)</string>
-  <string name="provider_repository_format">%1$s (%2$sのリポジトリ)</string>
-  <string name="unknown_value">不明</string>
-  <!-- Import/export -->
-  <string name="preferences_import_success">設定が正常にインポートされました</string>
-  <string name="preferences_import_error">設定のインポート中にエラーが発生しました</string>
-  <string name="invalid_json_file">JSON ファイルが無効です</string>
-  <string name="preferences_export_success">設定が正常にエクスポートされました</string>
-  <string name="preferences_export_error">設定のエクスポート中にエラーが発生しました</string>
-  <!-- Update check preference -->
-  <string name="pref_enable_update_check_title">更新を自動的に確認する</string>
-  <string name="pref_enable_update_check_summary">無効化するとアプリは、新しいバージョンを自動的に確認しません</string>
-  <!-- Donation Screen -->
-  <string name="donation_screen_title">寄付する</string>
-  <string name="copy_address">コピー</string>
-  <string name="address_copied">アドレスをコピーしました</string>
-  <string name="donation_help_development">このアプリの開発とメンテナンスを支援してください！</string>
-  <string name="donation_traditional_methods">従来の方法でサポート:</string>
-  <string name="donation_crypto_methods">ご希望であれば暗号通貨での寄付も可能です:</string>
+    <string name="app_name">Spam Call Blocker</string>
+    <string name="success_call_screening_role">ロールコールスクリーニングの要求に成功しました！</string>
+    <string name="failed_call_screening_role">ロールコールスクリーニングの要求に失敗しました</string>
+    <string name="telecom_manager_unavailable">Telecom Manager は利用できません。</string>
+    <string name="call_screening_role_prompt">コールスクリーニングのロールを付与してください。</string>
+    <string name="permissions_required_title">必要な権限</string>
+    <string name="permissions_required_message">アプリを正常に動作させるには以下の権限が必要です:\n\n%s\n\nシステム設定を開いて、権限を手動で付与してください。</string>
+    <string name="go_to_settings">設定を開く</string>
+    <string name="permission_read_call_log">通話履歴を読み取り</string>
+    <string name="permission_read_phone_state">電話の状態を読み取り</string>
+    <string name="permission_read_contacts">連絡先の読み取り</string>
+    <string name="permission_answer_phone_calls">電話に出る</string>
+    <string name="permission_post_notifications">通知の投稿</string>
+    <string name="blocked_text_format">%1$s (ブロック済み)</string>
+    <string name="whitelisted_text_format">%1$s (ホワイトリスト)</string>
+    <string name="duration_label">着信の経過時間: %1$d 秒</string>
+    <string name="incoming_call_not_spam">着信はスパムではないようです</string>
+    <string name="notification_channel_name">Spam Call Blocker</string>
+    <string name="notification_title_spam_blocked">着信をブロック済み: %1$s</string>
+    <string name="number_copied_to_clipboard">電話番号をクリップボードにコピーしました</string>
+    <!-- Call types -->
+    <string name="call_incoming">着信</string>
+    <string name="call_missed">不在着信</string>
+    <string name="call_rejected">通話拒否</string>
+    <string name="call_blocked">着信をブロック済み</string>
+    <string name="call_unknown">不明</string>
+    <!-- Preferences -->
+    <string name="action_settings">設定</string>
+    <string name="about">アプリについて</string>
+    <string name="donate">寄付</string>
+    <!-- Preferences Sections -->
+    <string name="pref_category_general_blocking">一般</string>
+    <string name="pref_category_unknown_phone_api">Unknownphone API 🌐</string>
+    <string name="pref_category_tellows_api">Tellows API 🌐</string>
+    <string name="pref_category_truecaller_api">Truecaller API 🌐</string>
+    <string name="pref_category_spam_filters">スパム電話番号のフィルタ</string>
+    <string name="pref_category_pattern_blocking">パターンブロック</string>
+    <string name="pref_category_other_options">その他のブロックオプション</string>
+    <string name="pref_category_notifications">通知</string>
+    <!-- Pattern Blocking Settings -->
+    <string name="pref_enable_pattern_blocking_title">パターンブロックを有効化</string>
+    <string name="pref_enable_pattern_blocking_summary">特定のパターンに一致する電話番号からの着信をブロックします</string>
+    <string name="pref_pattern_list_title">パターンの一覧</string>
+    <string name="pref_pattern_list_summary">ブロックするパターンを入力で設定します (一行ごと)</string>
+    <string name="pref_pattern_list_error">無効なパターンです。数字、「+」と「*」のみを使用してください。パターンに「**」を含めることはできません。</string>
+    <string name="pref_pattern_list_example">例: +33162* (先頭が始まる番号)、*98 (末尾が終わる番号)、213*134 (先頭の始まりと末尾の終わり)、*123* (123 を含む) など。お住まいの国の電話番号には、電話番号の接頭辞を追加しないでください。</string>
+    <!-- General Blocking Settings -->
+    <string name="pref_enable_blocking_title">ブロックを有効化</string>
+    <string name="pref_enable_blocking_summary">通話のブロック機能を有効化または無効化します</string>
+    <!-- API Unknownphone -->
+    <string name="pref_filter_lista_spam_title">Unknownphone API</string>
+    <string name="pref_filter_lista_spam_summary">(推奨) unknownphone.com API にリストされているスパムからの着信をブロックします</string>
+    <string name="pref_filter_lista_spam_api_language_title">unknownphone.com API の言語</string>
+    <string name="pref_filter_lista_spam_api_language_summary">unknownphone.com API で検索する言語を選択してください (結果に影響)</string>
+    <!-- API Tellows -->
+    <string name="pref_filter_tellows_title">Tellows API</string>
+    <string name="pref_filter_tellows_summary">(推奨) Tellows API にリストされているスパムからの着信をブロックします</string>
+    <string name="pref_filter_tellows_api_country_title">Tellows API の国</string>
+    <string name="pref_filter_tellows_api_country_summary">Tellows API で検索する国を選択してください (結果に影響)</string>
+    <!-- API Truecaller -->
+    <string name="pref_filter_truecaller_title">Truecaller API</string>
+    <string name="pref_filter_truecaller_summary">(推奨) Truecaller API によって識別されたスパムからの着信をブロックします</string>
+    <string name="pref_filter_truecaller_api_country_title">Truecaller API の国</string>
+    <string name="pref_filter_truecaller_api_country_summary">Truecaller API で検索する国を選択してください (結果に影響)</string>
+    <!-- Other Blocking Options -->
+    <string name="pref_block_non_contacts_title">連絡先に未登録の番号をブロックする</string>
+    <string name="pref_block_non_contacts_summary">連絡先に登録されていない電話番号からの着信をブロックします</string>
+    <string name="pref_block_hidden_numbers_title">非表示の番号をブロックする</string>
+    <string name="pref_block_hidden_numbers_summary">非通知またはプライベート番号からの着信をブロックします</string>
+    <string name="pref_block_international_numbers_title">国際電話をブロックする</string>
+    <string name="pref_block_international_numbers_summary">他国からの着信をブロックします</string>
+    <string name="pref_block_stir_shaken_risk_title">STIR/SHAKEN を確認する</string>
+    <string name="pref_block_stir_shaken_risk_summary">STIR/SHAKEN システムによって不正の可能性があるとマークされた着信をブロックします (Android 11 以降のみ対応、一部の国とキャリアで利用可能)</string>
+    <string name="pref_mute_instead_of_block_title">ブロックの代わりにミュートにする</string>
+    <string name="pref_mute_instead_of_block_summary">スパムからの着信を完全にブロックせずにミュートにします</string>
+    <!-- Notifications -->
+    <string name="pref_show_notification_title">ブロック時に通知を表示する</string>
+    <string name="pref_show_notification_summary">着信がブロックされたときに通知を表示します</string>
+    <!-- Call item actions  -->
+    <string name="open_in_lista_spam_com">ListaSpam を開く</string>
+    <string name="open_in_unknown_phone_com">UnknownPhone を開く</string>
+    <string name="search_in_google">Google で検索</string>
+    <string name="open_in_whatsapp">WhatsApp を開く</string>
+    <string name="add_to_contacts">連絡先に追加する</string>
+    <string name="block">ブロック</string>
+    <string name="add_to_whitelist">ホワイトリストに追加</string>
+    <string name="unblock">ブロックを解除</string>
+    <string name="remove_from_whitelist">ホワイトリストから削除</string>
+    <!-- SpamUtils blocking reasons -->
+    <string name="block_reason_long">着信をブロック済み:</string>
+    <string name="block_reason">理由:</string>
+    <string name="blocking_disabled">設定で着信のブロックが無効化されています</string>
+    <string name="block_stir_shaken_risk">STIR/SHAKEN - なりすましの可能性がある着信</string>
+    <string name="block_hidden_number">電話番号が非表示</string>
+    <string name="block_spam_number">スパムとして報告</string>
+    <string name="block_international_call">国際電話</string>
+    <string name="block_pattern_match">パターン一致</string>
+    <string name="block_already_blocked_number">ブロック済みの電話番号</string>
+    <string name="block_non_contact">連絡先に未登録</string>
+    <string name="export_config">設定とリストをエクスポート</string>
+    <string name="import_config">設定とリストをインポート</string>
+    <string name="test_number">テスト番号</string>
+    <string name="aceptar">受け入れる</string>
+    <string name="cancelar">キャンセル</string>
+    <string name="type_number">有効な電話番号を入力してください</string>
+    <!-- Updates -->
+    <string name="update_available_title">更新が利用可能です</string>
+    <string name="update_available_message">新しいバージョンがあります: %1$s\nダウンロードしますか？</string>
+    <!-- Reports -->
+    <string name="report_title">電話番号を報告する</string>
+    <string name="report_label">理由を説明してください</string>
+    <string name="report_hint">簡単な説明</string>
+    <string name="where_to_report">どこに報告しますか？</string>
+    <string name="report_spam">スパム</string>
+    <string name="report_not_spam">スパムではない</string>
+    <string name="accept">送信</string>
+    <string name="cancel">キャンセル</string>
+    <string name="report_validation_message">少なくとも 2 つの単語と 5 文字を含める必要があります。</string>
+    <string name="report_radio_validation">スパムかどうかを選択してください。</string>
+    <string name="report_success_prefix">報告先</string>
+    <string name="and">と</string>
+    <string name="report_failure">報告を送信できませんでした</string>
+    <string name="select_at_least_one_provider">少なくとも 1 つのプロバイダーを選択してください</string>
+    <string name="reported_to_unknown_phone">UnknownPhone</string>
+    <string name="reported_to_tellows">Tellows</string>
+    <string name="reported_to_truecaller">TrueCaller</string>
+    <string name="truecaller_prefix_repository">TrueCaller (%1$s の接頭辞リポジトリ)</string>
+    <string name="truecaller_default_repository">TrueCaller (デフォルトの接頭辞リポジトリ)</string>
+    <string name="provider_repository_format">%1$s (%2$sのリポジトリ)</string>
+    <string name="unknown_value">不明</string>
+    <!-- Import/export -->
+    <string name="preferences_import_success">設定が正常にインポートされました</string>
+    <string name="preferences_import_error">設定のインポート中にエラーが発生しました</string>
+    <string name="invalid_json_file">JSON ファイルが無効です</string>
+    <string name="preferences_export_success">設定が正常にエクスポートされました</string>
+    <string name="preferences_export_error">設定のエクスポート中にエラーが発生しました</string>
+    <!-- Update check preference -->
+    <string name="pref_enable_update_check_title">更新を自動的に確認する</string>
+    <string name="pref_enable_update_check_summary">無効化するとアプリは、新しいバージョンを自動的に確認しません</string>
+    <!-- Donation Screen -->
+    <string name="donation_screen_title">寄付する</string>
+    <string name="copy_address">コピー</string>
+    <string name="address_copied">アドレスをコピーしました</string>
+    <string name="donation_help_development">このアプリの開発とメンテナンスを支援してください！</string>
+    <string name="donation_traditional_methods">従来の方法でサポート:</string>
+    <string name="donation_crypto_methods">ご希望であれば暗号通貨での寄付も可能です:</string>
 </resources>

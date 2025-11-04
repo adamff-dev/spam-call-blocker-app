@@ -92,6 +92,7 @@
     <string name="open_in_lista_spam_com">Apri in ListaSpam</string>
     <string name="open_in_unknown_phone_com">Apri in UnknownPhone</string>
     <string name="search_in_google">Cerca su Google</string>
+    <string name="open_in_whatsapp">Apri in WhatsApp</string>
     <string name="block">Blocca</string>
     <string name="add_to_whitelist">Aggiungi alla lista bianca</string>
     <string name="unblock">Sblocca</string>

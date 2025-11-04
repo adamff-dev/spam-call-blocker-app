@@ -99,6 +99,7 @@
     <string name="open_in_lista_spam_com">Abrir en ListaSpam</string>
     <string name="open_in_unknown_phone_com">Abrir en UnknownPhone</string>
     <string name="search_in_google">Buscar en Google</string>
+    <string name="open_in_whatsapp">Abrir en WhatsApp</string>
     <string name="block">Bloquear</string>
     <string name="add_to_whitelist">Añadir a lista blanca</string>
     <string name="unblock">Desbloquear</string>

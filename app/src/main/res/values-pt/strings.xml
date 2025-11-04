@@ -85,6 +85,7 @@
     <string name="open_in_lista_spam_com">Abrir no ListaSpam</string>
     <string name="open_in_unknown_phone_com">Abrir no UnknownPhone</string>
     <string name="search_in_google">Pesquisar no Google</string>
+    <string name="open_in_whatsapp">Abrir no WhatsApp</string>
     <string name="block">Bloquear</string>
     <string name="add_to_whitelist">Adicionar à lista branca</string>
     <string name="unblock">Desbloquear</string>

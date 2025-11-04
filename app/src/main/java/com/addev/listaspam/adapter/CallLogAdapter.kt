@@ -28,7 +28,12 @@ import com.addev.listaspam.util.removeSpamNumber
 import com.addev.listaspam.util.removeWhitelistNumber
 import com.addev.listaspam.util.saveSpamNumber
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Locale
+import androidx.core.net.toUri
 
 class CallLogAdapter(
     private val context: Context,
@@ -45,17 +50,19 @@ class CallLogAdapter(
         const val GOOGLE_URL_TEMPLATE = "https://www.google.com/search?q=%s"
         const val LISTA_SPAM_URL_TEMPLATE = "https://www.listaspam.com/busca.php?Telefono=%s"
         const val UNKNOWN_PHONE_URL_TEMPLATE = "https://www.unknownphone.com/phone/%s"
+        const val WHATSAPP_URL_TEMPLATE = "https://wa.me/%s"
     }
-
-    private val locale = Locale.getDefault()
-
-    private val formatter: SimpleDateFormat = if (locale.language == "en") {
-        SimpleDateFormat("MM/dd/yyyy hh:mm:ss a", locale)
-    } else {
-        SimpleDateFormat("dd/MM/yyyy HH:mm:ss", locale)
-    }
+    
+    private val formatter: DateTimeFormatter = getSystemLocalizedFormatter()
 
     private var onItemChangedListener: OnItemChangedListener? = null
+
+    private fun getSystemLocalizedFormatter(): DateTimeFormatter {
+        val locale = Locale.getDefault()
+        return DateTimeFormatter
+            .ofLocalizedDateTime(FormatStyle.SHORT)
+            .withLocale(locale)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CallLogViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_call_log, parent, false)
@@ -96,7 +103,9 @@ class CallLogAdapter(
                 contactName ?: number
             }
             numberTextView.text = textToShow
-            dateTextView.text = formatter.format(callLog.date)
+            dateTextView.text = formatter.format(
+                Instant.ofEpochMilli(callLog.date.time).atZone(ZoneId.systemDefault())
+            )
             durationTextView.text = context.getString(R.string.duration_label, callLog.duration)
 
             val action = when (callLog.type) {
@@ -182,6 +191,11 @@ class CallLogAdapter(
 
                         R.id.open_in_unknown_phone_action -> {
                             openInUnknownPhone(number)
+                            true
+                        }
+
+                        R.id.open_in_whatsapp_action -> {
+                            openInWhatsApp(number)
                             true
                         }
 
@@ -277,13 +291,21 @@ class CallLogAdapter(
 
     private fun openInListaSpam(number: String) {
         val url = String.format(LISTA_SPAM_URL_TEMPLATE, number)
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         context.startActivity(intent)
     }
 
     private fun openInUnknownPhone(number: String) {
         val url = String.format(UNKNOWN_PHONE_URL_TEMPLATE, number)
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+        context.startActivity(intent)
+    }
+
+    private fun openInWhatsApp(number: String) {
+        // Remove any non-digit characters except +
+        val cleanNumber = number.replace(Regex("[^+\\d]"), "")
+        val url = String.format(WHATSAPP_URL_TEMPLATE, cleanNumber)
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         context.startActivity(intent)
     }
 

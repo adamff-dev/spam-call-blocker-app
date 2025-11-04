@@ -13,6 +13,9 @@
         android:id="@+id/open_in_unknown_phone_action"
         android:title="@string/open_in_unknown_phone_com" />
     <item
+        android:id="@+id/open_in_whatsapp_action"
+        android:title="@string/open_in_whatsapp" />
+    <item
         android:id="@+id/block_action"
         android:title="@string/block" />
     <item

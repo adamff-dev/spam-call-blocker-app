@@ -43,7 +43,7 @@
     <string name="pref_category_notifications">Notificações</string>
 
     <!-- General Blocking Settings -->
-    <string name="pref_pattern_list_example">Por exemplo: +33162* (começa por), *98 (termina por), 213*134 (começa e termina por), *123* (contém 123 em qualquer ponto intermédio). Não adicione o prefixo do número de telefone aos números do seu país.</string>
+    <string name="pref_pattern_list_example">Por exemplo: +33162* (começa por), *98 (termina por), 213*134 (começa e termina por), *123* (contém 123 em qualquer ponto intermédio). Não adicione o prefixo do número de telefone aos números do seu país. Um por linha.</string>
     <string name="pref_enable_blocking_title">Ativar Bloqueio</string>
     <string name="pref_enable_blocking_summary">Ativar ou desativar a funcionalidade de bloqueio de chamadas</string>
 

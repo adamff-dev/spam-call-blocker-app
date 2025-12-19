@@ -48,7 +48,7 @@
     <string name="pref_pattern_list_title">Pattern List</string>
     <string name="pref_pattern_list_summary">Enter patterns to block (one per line)</string>
     <string name="pref_pattern_list_error">Invalid pattern. Use only numbers, +, and *. Patterns cannot contain **.</string>
-    <string name="pref_pattern_list_example">E.g.: +33162* (starts with), *98 (ends with), 213*134 (starts and ends with), *123* (contains 123 anywhere in between). Don\'t add phone number prefix for numbers in your country.</string>
+    <string name="pref_pattern_list_example">E.g.: +33162* (starts with), *98 (ends with), 213*134 (starts and ends with), *123* (contains 123 anywhere in between). Don\'t add phone number prefix for numbers in your country. One per line.</string>
 
     <!-- General Blocking Settings -->
     <string name="pref_enable_blocking_title">Enable Blocking</string>

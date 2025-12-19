@@ -48,7 +48,7 @@
     <string name="pref_pattern_list_title">Lista de patrones</string>
     <string name="pref_pattern_list_summary">Introduce los patrones a bloquear (uno por línea)</string>
     <string name="pref_pattern_list_error">Patrón no válido. Usa solo números, "+", y "*".</string>
-    <string name="pref_pattern_list_example">Ejemplo: +33162* (empieza por), *98 (termina en), 213*134 (empieza y termina en), *123* (contiene 123 en cualquier parte en medio). No añadas el prefijo telefónico para números de tu país.</string>
+    <string name="pref_pattern_list_example">Ejemplo: +33162* (empieza por), *98 (termina en), 213*134 (empieza y termina en), *123* (contiene 123 en cualquier parte en medio). No añadas el prefijo telefónico para números de tu país. Uno por línea.</string>
 
     <!-- General Blocking Settings -->
     <string name="pref_enable_blocking_title">Activar bloqueo</string>

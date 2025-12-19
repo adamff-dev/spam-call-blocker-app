@@ -93,14 +93,17 @@ fun setBlockedPatterns(context: Context, patterns: Set<String>) {
  * @param number The phone number to be saved as spam.
  */
 fun saveSpamNumber(context: Context, number: String) {
+    val normalizedNumber = normalizePhoneNumber(number)
+
     // Remove the number from the whitelist before adding it to the spam list
     removeWhitelistNumber(context, number)
+    removeWhitelistNumber(context, normalizedNumber)
 
     // Get the SharedPreferences and update the blocked numbers set
     val sharedPreferences = context.getSharedPreferences(SPAM_PREFS, Context.MODE_PRIVATE)
     val blockedNumbers =
         sharedPreferences.getStringSet(BLOCK_NUMBERS_KEY, mutableSetOf())?.toMutableSet()
-    blockedNumbers?.add(number)
+    blockedNumbers?.add(normalizedNumber)
 
     // Save the updated blocked numbers set to SharedPreferences
     sharedPreferences.edit {
@@ -115,11 +118,14 @@ fun saveSpamNumber(context: Context, number: String) {
  * @param number The phone number to be removed from the spam list.
  */
 fun removeSpamNumber(context: Context, number: String) {
+    val normalizedNumber = normalizePhoneNumber(number)
+
     // Get the SharedPreferences and update the blocked numbers set
     val sharedPreferences = context.getSharedPreferences(SPAM_PREFS, Context.MODE_PRIVATE)
     val blockedNumbers =
         sharedPreferences.getStringSet(BLOCK_NUMBERS_KEY, mutableSetOf())?.toMutableSet()
     blockedNumbers?.remove(number)
+    blockedNumbers?.remove(normalizedNumber)
 
     // Save the updated blocked numbers set to SharedPreferences
     sharedPreferences.edit {
@@ -202,58 +208,23 @@ fun getWhitelistNumbers(context: Context): Set<String> {
  * @return True if the number is blocked locally, false otherwise.
  */
 fun isNumberBlocked(context: Context, number: String): Boolean {
+    val normalizedNumber = normalizePhoneNumber(number)
     val sharedPreferences = context.getSharedPreferences(SPAM_PREFS, Context.MODE_PRIVATE)
-    val blockedNumbers = sharedPreferences.getStringSet(BLOCK_NUMBERS_KEY, emptySet()) ?: emptySet()
-    val normalizedNumber = number.replace("\\D".toRegex(), "")
-
-    // Helper to get user's country prefix (e.g., "+33")
-    fun getUserCountryPrefix(): String? {
-        return try {
-            val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
-            val countryIso = telephonyManager?.networkCountryIso?.uppercase()
-            if (countryIso != null) {
-                val phoneUtil = com.google.i18n.phonenumbers.PhoneNumberUtil.getInstance()
-                val code = phoneUtil.getCountryCodeForRegion(countryIso)
-                if (code > 0) "+$code" else null
-            } else null
-        } catch (e: Exception) { null }
-    }
-    val userPrefix = getUserCountryPrefix()
-
-    fun matchesPattern(pattern: String, num: String): Boolean {
-        return when {
-            pattern == "*" -> true
-            pattern.startsWith("*") && pattern.endsWith("*") && pattern.length > 2 -> num.contains(pattern.substring(1, pattern.length-1))
-            pattern.startsWith("*") -> num.endsWith(pattern.substring(1))
-            pattern.endsWith("*") -> num.startsWith(pattern.substring(0, pattern.length-1))
-            pattern.contains("*") -> {
-                val parts = pattern.split("*")
-                if (parts.size == 2) num.startsWith(parts[0]) && num.endsWith(parts[1])
-                else false
-            }
-            else -> num == pattern
-        }
-    }
-
-    for (pattern in blockedNumbers) {
-        if (pattern.isNullOrBlank()) continue
-        val normalizedPattern = pattern.replace("\\D".toRegex(), "")
-        // Try direct match
-        if (matchesPattern(normalizedPattern, normalizedNumber)) return true
-        // If pattern does not start with '+', try with user prefix
-        if (!pattern.startsWith("+") && userPrefix != null) {
-            val withPrefix = (userPrefix + normalizedPattern).replace("\\D".toRegex(), "")
-            if (matchesPattern(withPrefix, normalizedNumber)) return true
-        }
+    var blockedNumbers = sharedPreferences.getStringSet(BLOCK_NUMBERS_KEY, emptySet())
+    blockedNumbers = blockedNumbers?.map { normalizePhoneNumber(it) }?.toSet()
+    if (!blockedNumbers.isNullOrEmpty()) {
+        return blockedNumbers.contains(normalizedNumber)
     }
     return false
 }
 
 fun isNumberWhitelisted(context: Context, number: String): Boolean {
+    val normalizedNumber = normalizePhoneNumber(number)
     val sharedPreferences = context.getSharedPreferences(SPAM_PREFS, Context.MODE_PRIVATE)
-    val whitelistedNumbers = sharedPreferences.getStringSet(WHITELIST_NUMBERS_KEY, emptySet())
-    if (whitelistedNumbers != null) {
-        return whitelistedNumbers.contains(number)
+    var whitelistedNumbers = sharedPreferences.getStringSet(WHITELIST_NUMBERS_KEY, emptySet())
+    whitelistedNumbers = whitelistedNumbers?.map { normalizePhoneNumber(it) }?.toSet()
+    if (!whitelistedNumbers.isNullOrEmpty()) {
+        return whitelistedNumbers.contains(normalizedNumber)
     }
     return false
 }
@@ -261,4 +232,6 @@ fun isNumberWhitelisted(context: Context, number: String): Boolean {
 fun isUpdateCheckEnabled(context: Context): Boolean =
     getBooleanPref(context, "pref_enable_update_check", true)
 
-
+private fun normalizePhoneNumber(number: String): String {
+    return number.replace("\\D".toRegex(), "")
+}

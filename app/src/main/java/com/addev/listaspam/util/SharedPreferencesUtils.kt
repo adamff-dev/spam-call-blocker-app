@@ -3,6 +3,7 @@ package com.addev.listaspam.util
 import android.content.Context
 import androidx.preference.PreferenceManager
 import androidx.core.content.edit
+import com.addev.listaspam.privateContact.normalizePhone
 
 const val SPAM_PREFS = "SPAM_PREFS"
 const val BLOCK_NUMBERS_KEY = "BLOCK_NUMBERS"
@@ -204,7 +205,7 @@ fun getWhitelistNumbers(context: Context): Set<String> {
 fun isNumberBlocked(context: Context, number: String): Boolean {
     val sharedPreferences = context.getSharedPreferences(SPAM_PREFS, Context.MODE_PRIVATE)
     val blockedNumbers = sharedPreferences.getStringSet(BLOCK_NUMBERS_KEY, emptySet()) ?: emptySet()
-    val normalizedNumber = number.replace("\\D".toRegex(), "")
+    val normalizedNumber = number.normalizePhone()
 
     // Helper to get user's country prefix (e.g., "+33")
     fun getUserCountryPrefix(): String? {
@@ -237,12 +238,12 @@ fun isNumberBlocked(context: Context, number: String): Boolean {
 
     for (pattern in blockedNumbers) {
         if (pattern.isNullOrBlank()) continue
-        val normalizedPattern = pattern.replace("\\D".toRegex(), "")
+        val normalizedPattern = pattern.normalizePhone()
         // Try direct match
         if (matchesPattern(normalizedPattern, normalizedNumber)) return true
         // If pattern does not start with '+', try with user prefix
         if (!pattern.startsWith("+") && userPrefix != null) {
-            val withPrefix = (userPrefix + normalizedPattern).replace("\\D".toRegex(), "")
+            val withPrefix = (userPrefix + normalizedPattern).normalizePhone()
             if (matchesPattern(withPrefix, normalizedNumber)) return true
         }
     }

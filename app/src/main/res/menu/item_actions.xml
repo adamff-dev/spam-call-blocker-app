@@ -16,6 +16,9 @@
         android:id="@+id/open_in_whatsapp_action"
         android:title="@string/open_in_whatsapp" />
     <item
+        android:id="@+id/open_in_telegram_action"
+        android:title="@string/open_in_telegram" />
+    <item
         android:id="@+id/add_to_contacts_action"
         android:title="@string/add_to_contacts" />
     <item

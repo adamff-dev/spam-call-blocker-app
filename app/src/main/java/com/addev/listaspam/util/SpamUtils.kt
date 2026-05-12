@@ -3,7 +3,6 @@ package com.addev.listaspam.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -14,7 +13,11 @@ import android.telecom.TelecomManager
 import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
+import com.addev.listaspam.ListaSpamApp
 import com.addev.listaspam.R
+import com.addev.listaspam.privateContact.ContactType
+import com.addev.listaspam.privateContact.PrivateContact
+import com.addev.listaspam.privateContact.normalizePhone
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,11 +25,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.selects.onTimeout
 import kotlinx.coroutines.selects.select
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.logging.Logger
 
 /**
  * Utility class for handling spam number checks and notifications.
@@ -34,8 +35,6 @@ import java.util.logging.Logger
 class SpamUtils {
 
     companion object {
-        private const val SPAM_PREFS = "SPAM_PREFS"
-
         object VerificationStatus {
             const val FAILED = 2
         }
@@ -89,7 +88,6 @@ class SpamUtils {
             return number == pattern
         }
 
-        var idx = 0
         var currentIndex = 0
 
         // If pattern starts with wildcard, skip empty prefix
@@ -139,9 +137,6 @@ class SpamUtils {
 
             val number = if (details != null) getRawPhoneNumber(details) else phoneNumber;
 
-            val sharedPreferences = context.getSharedPreferences(SPAM_PREFS, Context.MODE_PRIVATE)
-            val blockedNumbers = sharedPreferences.getStringSet(BLOCK_NUMBERS_KEY, null)
-
             if (number.isNullOrBlank()) {
                 if (shouldBlockHiddenNumbers(context)) {
                     handleSpamNumber(
@@ -151,21 +146,20 @@ class SpamUtils {
                         context.getString(R.string.block_hidden_number),
                         callback
                     )
-                    return@launch
                 } else {
                     callback(false)
-                    return@launch
                 }
+                return@launch
             }
 
             // Check whitelist first - if whitelisted, always allow
-            if (isNumberWhitelisted(context, number)) {
+            if (isNumberWhitelisted(number)) {
                 callback(false)
                 return@launch
             }
 
             // End call if the number is already blocked
-            if (blockedNumbers?.contains(number) == true) {
+            if (isNumberBlocked(number)) {
                 handleSpamNumber(
                     context,
                     number,
@@ -241,9 +235,7 @@ class SpamUtils {
             }
 
             val spamCheckers: List<suspend (String) -> Boolean> = buildSpamCheckers(context)
-            val isSpam = runBlocking {
-                isSpamRace(spamCheckers, number)
-            }
+            val isSpam = isSpamRace(spamCheckers, number)
 
             if (isSpam) {
                 handleSpamNumber(
@@ -260,6 +252,17 @@ class SpamUtils {
         }
     }
 
+    private fun isNumberBlocked(number: String): Boolean {
+        return ListaSpamApp.get().contactsCache.value[normalize(number)]?.type == ContactType.BLOCK.value
+    }
+
+    private fun isNumberWhitelisted(number: String): Boolean {
+        return ListaSpamApp.get().contactsCache.value[normalize(number)]?.type == ContactType.WHITELIST.value
+    }
+
+    fun normalize(number: String): String {
+        return number.normalizePhone()
+    }
     /**
      * Performs a "race" among multiple spam checkers to determine if a phone number is spam.
      *
@@ -362,16 +365,6 @@ class SpamUtils {
     }
 
     /**
-     * Normalizes a phone number by removing all non-digit characters.
-     *
-     * @param number The phone number to normalize.
-     * @return The normalized phone number.
-     */
-    private fun normalizePhoneNumber(number: String): String {
-        return number.replace("\\D".toRegex(), "")
-    }
-
-    /**
      * Checks if a phone number exists in the device's contact agenda.
      *
      * This function determines whether a given phone number is associated with
@@ -395,21 +388,17 @@ class SpamUtils {
             Uri.encode(phoneNumber)
         )
 
-        var cursor: Cursor? = null
-        try {
-            cursor = context.contentResolver.query(
+        return try {
+            context.contentResolver.query(
                 uri,
                 arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME),
                 null,
                 null,
                 null
-            )
-            return cursor != null && cursor.moveToFirst()
+            )?.use { it.moveToFirst() } ?: false
         } catch (e: Exception) {
             e.printStackTrace()
-            return false
-        } finally {
-            cursor?.close()
+            false
         }
     }
 
@@ -450,29 +439,20 @@ class SpamUtils {
         )
 
         if (saveNumber) {
-            saveSpamNumber(context, number)
+            saveSpamNumber(number)
         }
         sendBlockedCallNotification(context, number, reason)
         callback(true)
     }
 
-    /**
-     * Handles the scenario when a phone number is not identified as spam.
-     * @param context Context for accessing resources.
-     * @param number Phone number identified as not spam.
-     */
-    private fun handleNonSpamNumber(
-        context: Context,
-        number: String
-    ) {
-        showToast(context, context.getString(R.string.incoming_call_not_spam))
-
-        CoroutineScope(Dispatchers.Main).launch {
-            sendNotification(
-                context,
-                context.getString(R.string.call_incoming),
-                context.getString(R.string.incoming_call_not_spam),
-                10000
+    private fun saveSpamNumber(number: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            ListaSpamApp.get().repository.insert(
+                PrivateContact(
+                    name = number,
+                    number = number,
+                    type = 1
+                )
             )
         }
     }
@@ -488,5 +468,4 @@ class SpamUtils {
             Toast.makeText(context, message, duration).show()
         }
     }
-
 }

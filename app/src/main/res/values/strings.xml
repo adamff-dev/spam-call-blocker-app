@@ -100,6 +100,7 @@
     <string name="open_in_unknown_phone_com">Open in UnknownPhone</string>
     <string name="search_in_google">Search in Google</string>
     <string name="open_in_whatsapp">Open in WhatsApp</string>
+    <string name="open_in_telegram">Open in Telegram</string>
     <string name="add_to_contacts">Add to contacts</string>
     <string name="block">Block</string>
     <string name="add_to_whitelist">Add to whitelist</string>
@@ -162,6 +163,28 @@
     <!-- Update check preference -->
     <string name="pref_enable_update_check_title">Check for updates automatically</string>
     <string name="pref_enable_update_check_summary">If disabled, the app will not check for new versions automatically</string>
+
+    <!-- Private Contacts (DB whitelist) -->
+    <string name="private_contacts_title">Private Contacts</string>
+    <string name="add_private_contact">Add contact</string>
+    <string name="edit_private_contact">Edit contact</string>
+    <string name="delete_private_contact">Delete contact</string>
+    <string name="contact_added">Contact added</string>
+    <string name="contact_deleted">Contact deleted</string>
+    <string name="contact_name_hint">Name</string>
+    <string name="contact_number_hint">Phone number</string>
+    <string name="import_contacts">Import contacts</string>
+    <string name="export_contacts">Export contacts</string>
+    <string name="cancel_selection">Cancel selection</string>
+    <string name="delete_selected">Delete selected</string>
+    <string name="selected_count">%d selected</string>
+    <string name="delete_selected_confirm">Delete %d contacts?</string>
+    <string name="search_contacts_hint">Search</string>
+    <string name="pref_category_private_contacts">Number Rules</string>
+    <string name="pref_private_contacts_title">List</string>
+    <string name="pref_private_contacts_summary">Add or remove a number from the Whitelist and Blacklist</string>
+    <string name="whitelisted">whitelist</string>
+    <string name="blacklisted">blocked</string>
 
     <!-- Donation Screen -->
     <string name="donation_screen_title">Donations</string>

@@ -2,15 +2,13 @@ package com.addev.listaspam.service
 
 import android.telecom.Call
 import android.telecom.CallScreeningService
-import com.addev.listaspam.util.SpamUtils
+import com.addev.listaspam.ListaSpamApp
 import com.addev.listaspam.util.shouldMuteInsteadOfBlocking
 
 /**
  * Call screening service to identify and block spam calls.
  */
 class CallScreeningService : CallScreeningService() {
-
-    private val spamUtils = SpamUtils()
 
     /**
      * Called when an incoming call is being screened.
@@ -20,16 +18,21 @@ class CallScreeningService : CallScreeningService() {
         // Only handle incoming calls
         if (details.callDirection != Call.Details.DIRECTION_INCOMING) return
 
-        spamUtils.checkSpamNumber(this, null, details) { isSpam ->
-            if (isSpam) {
-                endCall(details)
-            } else {
-                // Allow the call to proceed normally
-                respondToCall(
-                    details, CallResponse.Builder()
-                        .setDisallowCall(false)
-                        .build()
-                )
+        val myApp = applicationContext as? ListaSpamApp
+        val spamUtils = myApp?.spamUtils
+
+        if (spamUtils != null) {
+            spamUtils.checkSpamNumber(this, null, details) { isSpam ->
+                if (isSpam) {
+                    endCall(details)
+                } else {
+                    // Allow the call to proceed normally
+                    respondToCall(
+                        details, CallResponse.Builder()
+                            .setDisallowCall(false)
+                            .build()
+                    )
+                }
             }
         }
     }

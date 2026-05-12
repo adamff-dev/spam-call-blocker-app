@@ -101,6 +101,23 @@
 
     </PreferenceCategory>
 
+    <!-- white/black list -->
+    <PreferenceCategory
+            android:title="@string/pref_category_private_contacts"
+            app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="pref_appearance"
+            android:title="@string/pref_private_contacts_title"
+            android:summary="@string/pref_private_contacts_summary"
+            app:iconSpaceReserved="false">
+            <intent
+                android:targetPackage="com.addev.listaspam"
+                android:targetClass="com.addev.listaspam.privateContact.PrivateContactsActivity"/>
+        </Preference>
+
+    </PreferenceCategory>
+
     <!-- Other Blocking Options -->
     <PreferenceCategory
         android:title="@string/pref_category_other_options"

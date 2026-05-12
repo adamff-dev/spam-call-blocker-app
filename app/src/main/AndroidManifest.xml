@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
+        android:name=".ListaSpamApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -41,6 +42,10 @@
                 <action android:name="android.telecom.CallScreeningService" />
             </intent-filter>
         </service>
+        <activity
+            android:name=".privateContact.PrivateContactsActivity"
+            android:exported="false"
+            android:label="@string/private_contacts_title" />
         <activity
             android:name=".DonationActivity"
             android:exported="false"

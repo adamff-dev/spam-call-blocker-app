@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.CallLog
 import android.provider.ContactsContract
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -18,51 +17,57 @@ import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
+import com.addev.listaspam.ListaSpamApp
 import com.addev.listaspam.R
+import com.addev.listaspam.privateContact.AddContactDialog
+import com.addev.listaspam.privateContact.normalizePhone
 import com.addev.listaspam.util.CallLogEntry
 import com.addev.listaspam.util.ReportDialogManager
-import com.addev.listaspam.util.addNumberToWhitelist
-import com.addev.listaspam.util.removeSpamNumber
-import com.addev.listaspam.util.removeWhitelistNumber
-import com.addev.listaspam.util.saveSpamNumber
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
-import androidx.core.net.toUri
 
 class CallLogAdapter(
-    private val context: Context,
-    var callLogs: List<CallLogEntry>,
-    var blockedNumbers: Set<String>,
-    var whitelistNumbers: Set<String>
+    private val context: AppCompatActivity,
+    var callLogs: List<CallLogEntry>
 ) : RecyclerView.Adapter<CallLogAdapter.CallLogViewHolder>() {
 
     interface OnItemChangedListener {
         fun onItemChanged(number: String)
     }
 
+    val adapterScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     companion object {
         const val GOOGLE_URL_TEMPLATE = "https://www.google.com/search?q=%s"
         const val LISTA_SPAM_URL_TEMPLATE = "https://www.listaspam.com/busca.php?Telefono=%s"
         const val UNKNOWN_PHONE_URL_TEMPLATE = "https://www.unknownphone.com/phone/%s"
         const val WHATSAPP_URL_TEMPLATE = "https://wa.me/%s"
+        const val TELEGRAM_URL_TEMPLATE = "https://t.me/%s"
     }
-    
+
     private val formatter: DateTimeFormatter = getSystemLocalizedFormatter()
-
-    private var onItemChangedListener: OnItemChangedListener? = null
-
     private fun getSystemLocalizedFormatter(): DateTimeFormatter {
         val locale = Locale.getDefault()
         return DateTimeFormatter
             .ofLocalizedDateTime(FormatStyle.SHORT)
             .withLocale(locale)
     }
+
+    private var onItemChangedListener: OnItemChangedListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CallLogViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_call_log, parent, false)
@@ -71,10 +76,17 @@ class CallLogAdapter(
 
     override fun onBindViewHolder(holder: CallLogViewHolder, position: Int) {
         val callLog = callLogs[position]
+        val number = callLog.number.normalizePhone()
+
+        val contact = ListaSpamApp.get().contactsCache.value[number]
+        val isBlocked = contact?.type == 1
+        val isWhitelisted = contact?.type == 0
+
         holder.bind(
             callLog,
-            blockedNumbers.contains(callLog.number),
-            whitelistNumbers.contains(callLog.number)
+            isBlocked,
+            isWhitelisted,
+            contact?.name
         )
     }
 
@@ -87,20 +99,19 @@ class CallLogAdapter(
         private val actionTextView: TextView = itemView.findViewById(R.id.actionTextView)
         private val overflowMenuButton = itemView.findViewById<ImageButton>(R.id.overflowMenuButton)
 
-        fun bind(callLog: CallLogEntry, isBlocked: Boolean, isWhitelisted: Boolean = false) {
+        fun bind(callLog: CallLogEntry, isBlocked: Boolean, isWhitelisted: Boolean = false, privateName: String? = null) {
             val number = callLog.number ?: "Unknown number"
+            numberTextView.tag = number
+
             val contactName = getContactName(context, number)
-            val textToShow = if (isBlocked) {
-                val displayText = when {
-                    contactName != null -> contactName
-                    number.isNotBlank() -> number
-                    else -> context.getString(R.string.unknown_value)
-                }
-                context.getString(R.string.blocked_text_format, displayText)
-            } else if (isWhitelisted) {
-                context.getString(R.string.whitelisted_text_format, contactName ?: number)
-            } else {
-                contactName ?: number
+
+            val displayName = privateName ?: contactName ?: number.takeIf { it.isNotBlank() }
+            ?: context.getString(R.string.unknown_value)
+
+            val textToShow = when {
+                isBlocked -> context.getString(R.string.blocked_text_format, displayName)
+                isWhitelisted -> context.getString(R.string.whitelisted_text_format, displayName)
+                else -> contactName ?: number
             }
             numberTextView.text = textToShow
             dateTextView.text = formatter.format(
@@ -161,6 +172,10 @@ class CallLogAdapter(
 
             overflowMenuButton.visibility = View.VISIBLE
             overflowMenuButton.setOnClickListener {
+                val currentContact = ListaSpamApp.get().contactsCache.value[number.normalizePhone()]
+                val currentlyBlocked = currentContact?.type == 1
+                val currentlyWhitelisted = currentContact?.type == 0
+
                 val popupMenu = PopupMenu(
                     itemView.context,
                     overflowMenuButton,
@@ -170,7 +185,7 @@ class CallLogAdapter(
                 )
                 popupMenu.inflate(R.menu.item_actions)
 
-                setDynamicTitles(popupMenu, isBlocked, isWhitelisted)
+                setDynamicTitles(popupMenu, currentlyBlocked, currentlyWhitelisted)
 
                 popupMenu.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
@@ -199,28 +214,31 @@ class CallLogAdapter(
                             true
                         }
 
+                        R.id.open_in_telegram_action -> {
+                            openInTelegram(number)
+                            true
+                        }
+
                         R.id.add_to_contacts_action -> {
                             addToContacts(number)
                             true
                         }
 
                         R.id.whitelist_action -> {
-                            if (isWhitelisted) {
-                                removeWhitelistNumber(context, number)
+                            if (currentlyWhitelisted) {
+                                removeNumber(number)
                             } else {
-                                addNumberToWhitelist(context, number)
+                                addNumber(number,textToShow,0,context.supportFragmentManager)
                             }
-                            onItemChangedListener?.onItemChanged(number)
                             true
                         }
 
                         R.id.block_action -> {
-                            if (isBlocked) {
-                                removeSpamNumber(context, number)
+                            if (currentlyBlocked) {
+                                removeNumber(number)
                             } else {
-                                saveSpamNumber(context, number)
+                                addNumber(number,textToShow,1,context.supportFragmentManager)
                             }
-                            onItemChangedListener?.onItemChanged(number)
                             true
                         }
 
@@ -242,19 +260,10 @@ class CallLogAdapter(
             isBlocked: Boolean,
             isWhitelisted: Boolean
         ) {
-            val blockMenuItem = popupMenu.menu.findItem(R.id.block_action)
-            val whitelistMenuItem = popupMenu.menu.findItem(R.id.whitelist_action)
-            if (isBlocked) {
-                blockMenuItem.setTitle(R.string.unblock)
-            } else {
-                blockMenuItem.setTitle(R.string.block)
-            }
-
-            if (isWhitelisted) {
-                whitelistMenuItem.setTitle(R.string.remove_from_whitelist)
-            } else {
-                whitelistMenuItem.setTitle(R.string.add_to_whitelist)
-            }
+            popupMenu.menu.findItem(R.id.block_action)
+                .setTitle(if (isBlocked) R.string.unblock else R.string.block)
+            popupMenu.menu.findItem(R.id.whitelist_action)
+                .setTitle(if (isWhitelisted) R.string.remove_from_whitelist else R.string.add_to_whitelist)
         }
     }
 
@@ -313,6 +322,40 @@ class CallLogAdapter(
         context.startActivity(intent)
     }
 
+    private fun openInTelegram(number: String) {
+        // Remove any non-digit characters except +
+        val cleanNumber = number.replace(Regex("[^+\\d]"), "")
+        val url = String.format(TELEGRAM_URL_TEMPLATE, cleanNumber)
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+        context.startActivity(intent)
+    }
+
+    private fun removeNumber(number: String) {
+        adapterScope.launch {
+            ListaSpamApp.get().repository.deleteByNumber(number)
+            withContext(Dispatchers.Main) {
+                onItemChangedListener?.onItemChanged(number)
+            }
+        }
+    }
+
+    fun addNumber(number: String, name: String, type: Int,fragmentManager: FragmentManager) {
+
+        fragmentManager.clearFragmentResultListener("contact_added")
+
+        fragmentManager.setFragmentResultListener("contact_added", context) { _, bundle ->
+            val addedNumber = bundle.getString("number") ?: ""
+            onItemChangedListener?.onItemChanged(addedNumber)
+        }
+
+        val dialog = AddContactDialog.newInstance(
+            name = name,
+            number = number,
+            type = type
+        )
+        dialog.show(fragmentManager, "AddContactDialog")
+    }
+
     private fun addToContacts(number: String) {
         val intent = Intent(Intent.ACTION_INSERT).apply {
             type = ContactsContract.Contacts.CONTENT_TYPE
@@ -335,4 +378,6 @@ class CallLogAdapter(
         val reportDialogManager = ReportDialogManager(context)
         reportDialogManager.show(number)
     }
+
+    fun destroy() = adapterScope.cancel()
 }

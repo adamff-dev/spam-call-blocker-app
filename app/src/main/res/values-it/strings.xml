@@ -93,6 +93,7 @@
     <string name="open_in_unknown_phone_com">Apri in UnknownPhone</string>
     <string name="search_in_google">Cerca su Google</string>
     <string name="open_in_whatsapp">Apri in WhatsApp</string>
+    <string name="open_in_telegram">Apri in Telegram</string>
     <string name="add_to_contacts">Aggiungi ai contatti</string>
     <string name="block">Blocca</string>
     <string name="add_to_whitelist">Aggiungi alla lista bianca</string>
@@ -155,6 +156,28 @@
     <!-- Update check preference -->
     <string name="pref_enable_update_check_title">Controlla automaticamente gli aggiornamenti</string>
     <string name="pref_enable_update_check_summary">Se disattivato, l\'app non cercherà automaticamente nuove versioni</string>
+
+    <!-- Private Contacts (DB whitelist) -->
+    <string name="private_contacts_title">Contatti Privati</string>
+    <string name="add_private_contact">Aggiungi contatto</string>
+    <string name="edit_private_contact">Modifica contatto</string>
+    <string name="delete_private_contact">Rimuovi contatto</string>
+    <string name="contact_added">Contatto aggiunto</string>
+    <string name="contact_deleted">Contact rimosso</string>
+    <string name="contact_name_hint">Nome</string>
+    <string name="contact_number_hint">numero</string>
+    <string name="import_contacts">Importa contatti</string>
+    <string name="export_contacts">Esporta contatti</string>
+    <string name="cancel_selection">Annulla</string>
+    <string name="delete_selected">Rimuovi</string>
+    <string name="selected_count">%d selezionati</string>
+    <string name="delete_selected_confirm">Rimuovi %d contatti?</string>
+    <string name="search_contacts_hint">Cerca</string>
+    <string name="pref_category_private_contacts">Regole numeri</string>
+    <string name="pref_private_contacts_title">Liste</string>
+    <string name="pref_private_contacts_summary">Aggiungi e rimuovi i numeri dalla Whitelist e Blacklist</string>
+    <string name="whitelisted">lista bianca</string>
+    <string name="blacklisted">bloccato</string>
 
     <!-- Donation Screen -->
     <string name="donation_screen_title">Donazioni</string>

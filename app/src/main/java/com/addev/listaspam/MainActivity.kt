@@ -6,7 +6,6 @@ import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import com.addev.listaspam.util.PermissionUtils
 import android.text.InputType
@@ -17,37 +16,29 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.addev.listaspam.adapter.CallLogAdapter
 import com.addev.listaspam.service.UpdateChecker
-import com.addev.listaspam.util.SpamUtils
-import com.addev.listaspam.util.getBlockedNumbers
-import com.addev.listaspam.util.getCallLogs
-import com.addev.listaspam.util.getListaSpamApiLang
-import com.addev.listaspam.util.getTellowsApiCountry
-import com.addev.listaspam.util.getWhitelistNumbers
-import com.addev.listaspam.util.setListaSpamApiLang
-import com.addev.listaspam.util.setTellowsApiCountry
-import com.addev.listaspam.util.getTruecallerApiCountry
-import com.addev.listaspam.util.setTruecallerApiCountry
-import com.addev.listaspam.util.isUpdateCheckEnabled
-import java.util.Locale
-import androidx.core.net.toUri
 import com.addev.listaspam.util.CountryLanguageUtils
+import com.addev.listaspam.util.getCallLogs
+import com.addev.listaspam.util.isUpdateCheckEnabled
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
 
+    private val repository by lazy { (application as ListaSpamApp).repository }
     private lateinit var intentLauncher: ActivityResultLauncher<Intent>
     private var permissionDeniedDialog: AlertDialog? = null
     private var callLogAdapter: CallLogAdapter? = null
     private var recyclerView: RecyclerView? = null
 
-    private val spamUtils = SpamUtils()
+    private val spamUtils by lazy { (application as ListaSpamApp).spamUtils }
 
     companion object {
         private const val GITHUB_USER = "adamff-dev"
@@ -57,6 +48,13 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // backward compatibility
+        lifecycleScope.launch {
+            val sharedPreferences = getSharedPreferences("SPAM_PREFS", Context.MODE_PRIVATE)
+            repository.migrateFromSharedPreferences(sharedPreferences)
+        }
+
         setContentView(R.layout.activity_main)
         setupWindowInsets()
         setupIntentLauncher()
@@ -69,6 +67,12 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
         CountryLanguageUtils.setTruecallerCountry(this)
         if (isUpdateCheckEnabled(this)) {
             checkUpdates()
+        }
+
+        lifecycleScope.launch {
+            ListaSpamApp.get().contactsCache.collect {
+                callLogAdapter?.notifyDataSetChanged()
+            }
         }
     }
 
@@ -117,31 +121,22 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
         }.start()
     }
 
-
-
     private fun showNumberInputDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(getString(R.string.test_number))
-
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_PHONE
-        builder.setView(input)
-
-        builder.setPositiveButton(getString(R.string.aceptar)) { dialog, _ ->
-            val number = input.text.toString().trim()
-            if (number.isNotEmpty()) {
-                spamUtils.checkSpamNumber(this, number, null)
-            } else {
-                Toast.makeText(this, getString(R.string.type_number), Toast.LENGTH_SHORT).show()
+        val input = EditText(this).apply { inputType = InputType.TYPE_CLASS_PHONE }
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.test_number))
+            .setView(input)
+            .setPositiveButton(getString(R.string.aceptar)) { dialog, _ ->
+                val number = input.text.toString().trim()
+                if (number.isNotEmpty()) {
+                    spamUtils.checkSpamNumber(this, number, null)
+                } else {
+                    Toast.makeText(this, getString(R.string.type_number), Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
             }
-            dialog.dismiss()
-        }
-
-        builder.setNegativeButton(getString(R.string.cancelar)) { dialog, _ ->
-            dialog.cancel()
-        }
-
-        builder.show()
+            .setNegativeButton(getString(R.string.cancelar)) { dialog, _ -> dialog.cancel() }
+            .show()
     }
 
     override fun onItemChanged(number: String) {
@@ -151,7 +146,10 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
                 positions.add(index)
             }
         }
-        refreshCallLogs(positions)
+
+        lifecycleScope.launch {
+            refreshCallLogs(positions)
+        }
     }
 
     private fun init() {
@@ -164,7 +162,9 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
                 Manifest.permission.READ_CALL_LOG
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            refreshCallLogs()
+            lifecycleScope.launch {
+                refreshCallLogs()
+            }
         }
     }
 
@@ -174,27 +174,27 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
     }
 
     private fun refreshCallLogs(positions: List<Int> = listOf()) {
-        val blockedNumbers = getBlockedNumbers(this)
-        val whitelistNumbers = getWhitelistNumbers(this)
-
-        val callLogs = getCallLogs(this)
-
         if (callLogAdapter == null) {
-            callLogAdapter = CallLogAdapter(this, callLogs, blockedNumbers, whitelistNumbers)
+            val callLogs = getCallLogs(this)
+            callLogAdapter = CallLogAdapter(this, callLogs)
             recyclerView?.adapter = callLogAdapter
             callLogAdapter?.setOnItemChangedListener(this)
         } else {
-            callLogAdapter?.callLogs = callLogs
-            callLogAdapter?.blockedNumbers = blockedNumbers
-            callLogAdapter?.whitelistNumbers = whitelistNumbers
-            callLogAdapter?.notifyDataSetChanged()
-        }
-
-        if (positions.isNotEmpty()) {
-            positions.forEach { position ->
-                callLogAdapter?.notifyItemChanged(position)
+            if (positions.isNotEmpty()) {
+                positions.forEach { position ->
+                    callLogAdapter?.notifyItemChanged(position)
+                }
+            } else {
+                val callLogs = getCallLogs(this)
+                callLogAdapter?.callLogs = callLogs
+                callLogAdapter?.notifyDataSetChanged()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        callLogAdapter?.destroy()
     }
 
     private fun setupWindowInsets() {

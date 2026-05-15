@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.addev.listaspam"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.addev.listaspam"
@@ -18,6 +18,11 @@ android {
         versionName = "2.5.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     buildTypes {
@@ -49,6 +54,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
     // Room
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")

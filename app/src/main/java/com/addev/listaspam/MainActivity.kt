@@ -22,13 +22,18 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.addev.listaspam.adapter.CallLogAdapter
+import com.addev.listaspam.databinding.ActivityMainBinding
+import com.addev.listaspam.privateContact.PrivateContact
 import com.addev.listaspam.service.UpdateChecker
 import com.addev.listaspam.util.CountryLanguageUtils
 import com.addev.listaspam.util.getCallLogs
 import com.addev.listaspam.util.isUpdateCheckEnabled
+import com.addev.listaspam.privateContact.normalizePhone
+import kotlinx.coroutines.Dispatchers
+
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
 
@@ -36,7 +41,11 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
     private lateinit var intentLauncher: ActivityResultLauncher<Intent>
     private var permissionDeniedDialog: AlertDialog? = null
     private var callLogAdapter: CallLogAdapter? = null
-    private var recyclerView: RecyclerView? = null
+
+    private lateinit var binding: ActivityMainBinding
+
+    private var isAdapterInitialized = false
+
 
     private val spamUtils by lazy { (application as ListaSpamApp).spamUtils }
 
@@ -55,12 +64,12 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
             repository.migrateFromSharedPreferences(sharedPreferences)
         }
 
-        setContentView(R.layout.activity_main)
-        setupWindowInsets()
-        setupIntentLauncher()
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        recyclerView = findViewById(R.id.recyclerView)
-        recyclerView?.layoutManager = LinearLayoutManager(this)
+        setupWindowInsets()
+        setupRecyclerView()
+        setupIntentLauncher()
 
         CountryLanguageUtils.setListaSpamLanguage(this)
         CountryLanguageUtils.setTellowsCountry(this)
@@ -70,8 +79,35 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
         }
 
         lifecycleScope.launch {
-            ListaSpamApp.get().contactsCache.collect {
-                callLogAdapter?.notifyDataSetChanged()
+            var previousMap = emptyMap<String, PrivateContact>()
+            ListaSpamApp.get().contactsCache.collect { contactsMap ->
+                callLogAdapter?.let { adapter ->
+                    val changed = (contactsMap.keys + previousMap.keys)
+                        .filter { contactsMap[it] != previousMap[it] }
+                        .toSet()
+                    adapter.currentList.forEachIndexed { index, item ->
+                        if (item.number.normalizePhone() in changed) {
+                            adapter.notifyItemChanged(index)
+                        }
+                    }
+                }
+                previousMap = contactsMap
+            }
+        }
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+
+            setHasFixedSize(true)
+
+            recycledViewPool.setMaxRecycledViews(0, 15)
+
+            itemAnimator?.apply {
+                addDuration = 200
+                removeDuration = 200
+                moveDuration = 200
             }
         }
     }
@@ -111,14 +147,14 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
     }
 
     private fun checkUpdates() {
-        Thread {
+        lifecycleScope.launch(Dispatchers.IO) {
             val checker = UpdateChecker(
-                context = this,
+                context = this@MainActivity,
                 githubUser = GITHUB_USER,
                 githubRepo = GITHUB_REPO
             )
             checker.checkForUpdateSync()
-        }.start()
+        }
     }
 
     private fun showNumberInputDialog() {
@@ -140,15 +176,11 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
     }
 
     override fun onItemChanged(number: String) {
-        val positions = mutableListOf<Int>()
-        callLogAdapter?.callLogs?.forEachIndexed { index, callLog ->
-            if (callLog.number == number) {
-                positions.add(index)
+        callLogAdapter?.let { adapter ->
+            val index = adapter.currentList.indexOfFirst {
+                it.number.normalizePhone() == number
             }
-        }
-
-        lifecycleScope.launch {
-            refreshCallLogs(positions)
+            if (index >= 0) adapter.notifyItemChanged(index)
         }
     }
 
@@ -173,23 +205,19 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
         init()
     }
 
-    private fun refreshCallLogs(positions: List<Int> = listOf()) {
-        if (callLogAdapter == null) {
-            val callLogs = getCallLogs(this)
-            callLogAdapter = CallLogAdapter(this, callLogs)
-            recyclerView?.adapter = callLogAdapter
+    private suspend fun refreshCallLogs() {
+        val callLogs = withContext(Dispatchers.IO) { getCallLogs(this@MainActivity) }
+        if (!isAdapterInitialized) {
+            callLogAdapter = CallLogAdapter(
+                context = this,
+                onItemClick = {},
+                fragmentManager = supportFragmentManager
+            )
+            binding.recyclerView.adapter = callLogAdapter
             callLogAdapter?.setOnItemChangedListener(this)
-        } else {
-            if (positions.isNotEmpty()) {
-                positions.forEach { position ->
-                    callLogAdapter?.notifyItemChanged(position)
-                }
-            } else {
-                val callLogs = getCallLogs(this)
-                callLogAdapter?.callLogs = callLogs
-                callLogAdapter?.notifyDataSetChanged()
-            }
+            isAdapterInitialized = true
         }
+        callLogAdapter?.submitList(callLogs)
     }
 
     override fun onDestroy() {
@@ -198,7 +226,7 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
     }
 
     private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets

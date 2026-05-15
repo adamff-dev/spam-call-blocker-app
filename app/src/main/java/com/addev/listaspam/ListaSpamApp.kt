@@ -8,6 +8,7 @@ import com.addev.listaspam.util.SpamUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -19,11 +20,18 @@ class ListaSpamApp : Application() {
 
     val spamUtils by lazy { SpamUtils() }
 
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val contactsCache: StateFlow<Map<String, PrivateContact>> by lazy {
         repository.allContacts
-            .map { list -> list.associateBy { it.number } }
+            .map { list ->
+                val limitedList = if (list.size > 500) {
+                    list.sortedByDescending { it.number.length }.take(500)
+                } else {
+                    list
+                }
+                limitedList.associateBy { it.number }
+            }
             .stateIn(appScope, SharingStarted.Eagerly, emptyMap())
     }
 
@@ -36,5 +44,10 @@ class ListaSpamApp : Application() {
         super.onCreate()
         instance = this
         contactsCache
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        appScope.cancel()
     }
 }

@@ -24,6 +24,8 @@ class PrivateContactRepository(private val dao: PrivateContactDao) {
         )
     }
 
+    suspend fun getByNumber(number: String): PrivateContact? = dao.getByNumber(normalize(number))
+
     suspend fun insert(contact: PrivateContact) {
         dao.insert(contact.copy(
             name = contact.name.trim(),
@@ -69,9 +71,9 @@ class PrivateContactRepository(private val dao: PrivateContactDao) {
         if (sharedPreferences.getBoolean("MIGRATION_DONE", false)) return
 
         // WHITELIST(0),
-        migrate(sharedPreferences, "WHITELIST_NUMBERS", 0)
+        migrate(sharedPreferences, "WHITELIST_NUMBERS", ContactType.WHITELIST.value)
         // BLOCK(1),
-        migrate(sharedPreferences, "BLOCK_NUMBERS", 1)
+        migrate(sharedPreferences, "BLOCK_NUMBERS", ContactType.BLOCK.value)
 
         sharedPreferences.edit {
             putBoolean("MIGRATION_DONE", true)

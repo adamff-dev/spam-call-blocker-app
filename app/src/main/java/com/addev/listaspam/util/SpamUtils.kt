@@ -19,7 +19,6 @@ import com.addev.listaspam.privateContact.ContactType
 import com.addev.listaspam.privateContact.PrivateContact
 import com.addev.listaspam.privateContact.normalizePhone
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -39,6 +38,8 @@ class SpamUtils {
             const val FAILED = 2
         }
     }
+
+    private val phoneNumberUtil by lazy { PhoneNumberUtil.getInstance() }
 
     /**
      * Extracts the raw phone number from the call details.
@@ -128,128 +129,141 @@ class SpamUtils {
         details: Call.Details?,
         callback: (isSpam: Boolean) -> Unit = {}
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            if (!isBlockingEnabled(context)) {
-                showToast(context, context.getString(R.string.blocking_disabled), Toast.LENGTH_LONG)
+        (context.applicationContext as? ListaSpamApp)?.let { app ->
+            app.appScope.launch(Dispatchers.IO) {
+                performSpamCheck(context, phoneNumber, details, callback)
+            }
+        } ?: run {
+            callback(false)
+        }
+    }
+
+    private suspend fun performSpamCheck(
+        context: Context,
+        phoneNumber: String?,
+        details: Call.Details?,
+        callback: (isSpam: Boolean) -> Unit
+    ) {
+        if (!isBlockingEnabled(context)) {
+            showToast(context, context.getString(R.string.blocking_disabled), Toast.LENGTH_LONG)
+            callback(false)
+            return
+        }
+
+        val number = if (details != null) getRawPhoneNumber(details) else phoneNumber;
+
+        if (number.isNullOrBlank()) {
+            if (shouldBlockHiddenNumbers(context)) {
+                handleSpamNumber(
+                    context,
+                    "",
+                    false,
+                    context.getString(R.string.block_hidden_number),
+                    callback
+                )
+            } else {
                 callback(false)
-                return@launch
             }
+            return
+        }
 
-            val number = if (details != null) getRawPhoneNumber(details) else phoneNumber;
+        // Check whitelist first - if whitelisted, always allow
+        if (isNumberWhitelisted(number)) {
+            callback(false)
+            return
+        }
 
-            if (number.isNullOrBlank()) {
-                if (shouldBlockHiddenNumbers(context)) {
-                    handleSpamNumber(
-                        context,
-                        "",
-                        false,
-                        context.getString(R.string.block_hidden_number),
-                        callback
-                    )
-                } else {
-                    callback(false)
-                }
-                return@launch
-            }
+        // End call if the number is already blocked
+        if (isNumberBlocked(number)) {
+            handleSpamNumber(
+                context,
+                number,
+                false,
+                context.getString(R.string.block_already_blocked_number),
+                callback
+            )
+            return
+        }
 
-            // Check whitelist first - if whitelisted, always allow
-            if (isNumberWhitelisted(number)) {
-                callback(false)
-                return@launch
-            }
+        // Don't check number if is in contacts
+        val isNumberInAgenda = isNumberInAgenda(context, number)
+        if (isNumberInAgenda) {
+            callback(false)
+            return
+        }
 
-            // End call if the number is already blocked
-            if (isNumberBlocked(number)) {
+        if (shouldBlockNonContacts(context)) {
+            handleSpamNumber(
+                context,
+                number,
+                false,
+                context.getString(R.string.block_non_contact),
+                callback
+            )
+            return
+        }
+
+        if (isPatternBlockingEnabled(context)) {
+            val patterns = getBlockedPatterns(context)
+            if (patterns.any { matchesPattern(number, it) }) {
                 handleSpamNumber(
                     context,
                     number,
                     false,
-                    context.getString(R.string.block_already_blocked_number),
+                    context.getString(R.string.block_pattern_match),
                     callback
                 )
-                return@launch
+                return
             }
+        }
 
-            // Don't check number if is in contacts
-            val isNumberInAgenda = isNumberInAgenda(context, number)
-            if (isNumberInAgenda) {
-                callback(false)
-                return@launch
-            }
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            shouldFilterWithStirShaken(context) &&
+            details?.callerNumberVerificationStatus == VerificationStatus.FAILED
+        ) {
+            handleSpamNumber(
+                context,
+                number,
+                false,
+                context.getString(R.string.block_stir_shaken_risk),
+                callback
+            )
+            return
+        }
 
-            if (shouldBlockNonContacts(context)) {
-                handleSpamNumber(
-                    context,
-                    number,
-                    false,
-                    context.getString(R.string.block_non_contact),
-                    callback
-                )
-                return@launch
-            }
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_PHONE_STATE
+            ) == PackageManager.PERMISSION_GRANTED
+            && shouldBlockInternationalNumbers(context)
+            && isInternationalCall(context, number)
+        ) {
+            handleSpamNumber(
+                context,
+                number,
+                false,
+                context.getString(R.string.block_international_call),
+                callback
+            )
+            return
+        }
 
-            if (isPatternBlockingEnabled(context)) {
-                val patterns = getBlockedPatterns(context)
-                if (patterns.any { matchesPattern(number, it) }) {
-                    handleSpamNumber(
-                        context,
-                        number,
-                        false,
-                        context.getString(R.string.block_pattern_match),
-                        callback
-                    )
-                    return@launch
-                }
-            }
-
-            if (
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-                shouldFilterWithStirShaken(context) &&
-                details?.callerNumberVerificationStatus == VerificationStatus.FAILED
-            ) {
-                handleSpamNumber(
-                    context,
-                    number,
-                    false,
-                    context.getString(R.string.block_stir_shaken_risk),
-                    callback
-                )
-                return@launch
-            }
-
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_PHONE_STATE
-                ) == PackageManager.PERMISSION_GRANTED
-                && shouldBlockInternationalNumbers(context)
-                && isInternationalCall(context, number)
-            ) {
-                handleSpamNumber(
-                    context,
-                    number,
-                    false,
-                    context.getString(R.string.block_international_call),
-                    callback
-                )
-                return@launch
-            }
-
-            val spamCheckers: List<suspend (String) -> Boolean> = buildSpamCheckers(context)
-            val isSpam = isSpamRace(spamCheckers, number)
-
+        val spamCheckers = buildSpamCheckers(context)
+        if (spamCheckers.isNotEmpty()) {
+            val isSpam = isSpamRace(spamCheckers, number, timeoutMs = 5000)
             if (isSpam) {
                 handleSpamNumber(
                     context,
                     number,
+                    true,
                     context.getString(R.string.block_spam_number),
                     callback
                 )
-            } else {
-                // handleNonSpamNumber(context, number)
-                callback(false)
-                return@launch
+                return
             }
         }
+        callback(false)
     }
 
     private fun isNumberBlocked(number: String): Boolean {
@@ -348,8 +362,6 @@ class SpamUtils {
 
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     private fun isInternationalCall(context: Context, phoneNumber: String): Boolean {
-        val phoneNumberUtil = PhoneNumberUtil.getInstance()
-
         return try {
             val parsedNumber = phoneNumberUtil.parse(phoneNumber, null) // Safe parsing
 
@@ -410,14 +422,14 @@ class SpamUtils {
      * @param number Phone number identified as spam.
      * @param callback Callback function to handle the result.
      */
-    private fun handleSpamNumber(
-        context: Context,
-        number: String,
-        reason: String,
-        callback: (isSpam: Boolean) -> Unit
-    ) {
-        handleSpamNumber(context, number, true, reason, callback)
-    }
+   private fun handleSpamNumber(
+       context: Context,
+       number: String,
+       reason: String,
+       callback: (isSpam: Boolean) -> Unit
+   ) {
+       handleSpamNumber(context, number, true, reason, callback)
+   }
 
     /**
      * Handles the scenario when a phone number is identified as spam.
@@ -446,7 +458,7 @@ class SpamUtils {
     }
 
     private fun saveSpamNumber(number: String) {
-        CoroutineScope(Dispatchers.IO).launch {
+        (ListaSpamApp.get().appScope).launch {
             ListaSpamApp.get().repository.insert(
                 PrivateContact(
                     name = number,

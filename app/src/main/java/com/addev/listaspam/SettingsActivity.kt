@@ -8,9 +8,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
-import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.addev.listaspam.preferences.PatternListPreference
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject

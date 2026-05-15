@@ -12,20 +12,11 @@ interface PrivateContactDao {
     @Query("SELECT * FROM private_contacts")
     suspend fun getAll(): List<PrivateContact>
 
-    @Query("SELECT * FROM private_contacts WHERE type = 1")
-    fun getBlockedListFlow(): Flow<List<PrivateContact>>
-
-    @Query("SELECT * FROM private_contacts WHERE type = 0")
-    fun getWhiteListFlow(): Flow<List<PrivateContact>>
-
     @Query("SELECT COALESCE((SELECT type FROM private_contacts WHERE number = :num), -1)")
     suspend fun getContactType(num: String): Int
 
-    @Query("UPDATE private_contacts SET type = :newType WHERE number = :num")
-    suspend fun updateStatusByNumber(num: String, newType: Int)
-
-    @Query("SELECT EXISTS(SELECT 1 FROM private_contacts WHERE number = :num)")
-    suspend fun exists(num: String): Boolean
+    @Query("SELECT * FROM private_contacts WHERE number = :num LIMIT 1")
+    suspend fun getByNumber(num: String): PrivateContact?
 
     @Query("DELETE FROM private_contacts WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: Set<Long>)

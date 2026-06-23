@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Spam Call Blocker</string>
-    <string name="success_call_screening_role">コールスクリーニングのロール要求に成功しました！</string>
-    <string name="failed_call_screening_role">コールスクリーニングのロール要求に失敗しました</string>
+    <string name="success_call_screening_role">通話スクリーニングの権限の要求に成功しました！</string>
+    <string name="failed_call_screening_role">通話スクリーニングの権限の要求に失敗しました</string>
     <string name="telecom_manager_unavailable">Telecom Manager は利用できません。</string>
-    <string name="call_screening_role_not_available">このデバイスではコールスクリーニングはサポートされていません。</string>
-    <string name="call_screening_role_prompt">コールスクリーニングのロールを付与してください。</string>
+    <string name="call_screening_role_not_available">このデバイスは通話スクリーニングに非対応です。</string>
+    <string name="call_screening_role_prompt">通話スクリーニングの権限を付与してください。</string>
     <string name="permissions_required_title">必要な権限</string>
     <string name="permissions_required_message">アプリを正常に動作させるには以下の権限が必要です:\n\n%s\n\nシステム設定を開いて、権限を手動で付与してください。</string>
     <string name="go_to_settings">設定を開く</string>
@@ -17,14 +17,14 @@
     <string name="blocked_text_format">%1$s (ブロック済み)</string>
     <string name="whitelisted_text_format">%1$s (ホワイトリスト)</string>
     <string name="duration_label">着信の経過時間: %1$d 秒</string>
-    <string name="incoming_call_not_spam">着信はスパムではないようです</string>
+    <string name="incoming_call_not_spam">着信は迷惑電話ではないようです</string>
     <string name="notification_channel_name">Spam Call Blocker</string>
     <string name="notification_title_spam_blocked">着信をブロック済み: %1$s</string>
     <string name="number_copied_to_clipboard">電話番号をクリップボードにコピーしました</string>
     <!-- Call types -->
     <string name="call_incoming">着信</string>
     <string name="call_missed">不在着信</string>
-    <string name="call_rejected">通話拒否</string>
+    <string name="call_rejected">着信拒否</string>
     <string name="call_blocked">着信をブロック済み</string>
     <string name="call_unknown">不明</string>
     <!-- Preferences -->
@@ -36,10 +36,10 @@
     <string name="pref_category_unknown_phone_api">Unknownphone API 🌐</string>
     <string name="pref_category_tellows_api">Tellows API 🌐</string>
     <string name="pref_category_truecaller_api">Truecaller API 🌐</string>
-    <string name="pref_category_spam_filters">スパム電話番号のフィルタ</string>
+    <string name="pref_category_spam_filters">迷惑電話番号のフィルター</string>
     <string name="pref_category_pattern_blocking">パターンブロック</string>
-    <string name="pref_category_pattern_whitelist">パターン例外リスト</string>
-    <string name="pref_category_number_list">電話番号リスト</string>
+    <string name="pref_category_pattern_whitelist">パターンホワイトリスト</string>
+    <string name="pref_category_number_list">電話番号のリスト</string>
     <string name="pref_category_other_options">その他のブロックオプション</string>
     <string name="pref_category_notifications">通知</string>
     <!-- Pattern Blocking Settings -->
@@ -47,47 +47,60 @@
     <string name="pref_enable_pattern_blocking_summary">特定のパターンに一致する電話番号からの着信をブロックします</string>
     <string name="pref_pattern_list_title">パターンリスト</string>
     <string name="pref_pattern_list_summary">ブロックするパターンを入力で設定します (一行ごと)</string>
-    <string name="pref_pattern_list_error">無効なパターンです。数字、「+」と「*」のみを使用してください。</string>
-    <string name="pref_pattern_list_example">例: +33162* (先頭が始まる番号)、*98 (末尾が終わる番号)、213*134 (先頭の始まりと末尾の終わり)、*123* (123 を含む) など。お住まいの国の電話番号には、電話番号の接頭辞を追加しないでください。</string>
-
+    <string name="pref_pattern_list_error">無効なパターンです。数字、+ および * のみ使用してください。</string>
+    <string name="pref_pattern_list_example">例: +33162* (先頭が一致)、*98 (末尾が一致)、213*134 (先頭と末尾が一致)、*123* (123 を含む)。国内の電話番号の接頭辞を追加しないでください。一行ごとに入力してください。</string>
     <!-- Pattern Exception List (Whitelist) Settings -->
     <string name="pref_enable_pattern_whitelisting_title">パターン例外リストを有効化</string>
-    <string name="pref_enable_pattern_whitelisting_summary">他のルールでブロックされていても、特定のパターンに一致する着信を許可します</string>
-    <string name="pref_pattern_exception_list_title">例外リスト</string>
-    <string name="pref_pattern_exception_list_summary">許可するパターンを入力で設定します (一行ごと)</string>
-    <string name="pref_pattern_exception_list_error">無効なパターンです。数字、「+」と「*」のみを使用してください。</string>
-    <string name="pref_pattern_exception_list_example">例: +33162* (先頭が始まる番号)、*98 (末尾が終わる番号)、213*134 (先頭の始まりと末尾の終わり)、*123* (123 を含む) など。お住まいの国の電話番号には、電話番号の接頭辞を追加しないでください。</string>
-
+    <string name="pref_enable_pattern_whitelisting_summary">他のルールでブロックされている場合でも、特定の電話番号のパターンに一致する通話を許可します</string>
+    <string name="pref_pattern_exception_list_title">パターン例外リスト</string>
+    <string name="pref_pattern_exception_list_summary">許可するパターンを入力してください (一行ごと)</string>
+    <string name="pref_pattern_exception_list_error">無効なパターンです。数字、+ および * のみ使用してください。</string>
+    <string name="pref_pattern_exception_list_example">例: +33162* (先頭が一致)、*98 (末尾が一致)、213*134 (先頭と末尾が一致)、*123* (123 を含む)。国内の電話番号の接頭辞を追加しないでください。一行ごとに入力してください。</string>
+    <!-- Blocked and Whitelisted Numbers -->
+    <string name="pref_blocked_numbers_list_title">ブロック済みの電話番号</string>
+    <string name="pref_blocked_numbers_list_summary">ブロックする電話番号を入力してください (一行ごと)</string>
+    <string name="pref_blocked_numbers_list_error">無効な電話番号です。数字と + のみ使用してください。</string>
+    <string name="pref_blocked_numbers_list_example">例: +33612345678、612345678。一行ごと。</string>
+    <string name="pref_whitelisted_numbers_list_title">ホワイトリスト済みの電話番号</string>
+    <string name="pref_whitelisted_numbers_list_summary">許可する電話番号を入力してください (一行ごと)</string>
+    <string name="pref_whitelisted_numbers_list_error">無効な電話番号です。数字と + のみ使用してください。</string>
+    <string name="pref_whitelisted_numbers_list_example">例: +33612345678、612345678。一行ごと。</string>
+    <!-- List Manager UI -->
+    <string name="list_empty">エントリはありません</string>
+    <string name="list_entry_hint">新しいエントリ…</string>
+    <string name="list_add_entry">エントリを追加</string>
+    <string name="list_entry_edit">編集</string>
+    <string name="list_entry_delete">削除</string>
+    <string name="list_entry_edit_title">エントリを編集</string>
+    <string name="list_entry_duplicate">すでにエントリが存在します</string>
+    <string name="pref_pattern_list_hint">例: +331*、*98、213*134</string>
+    <string name="pref_pattern_exception_list_hint">例: +331*、*98、213*134</string>
+    <string name="pref_blocked_numbers_list_hint">例: +33612345678</string>
+    <string name="pref_whitelisted_numbers_list_hint">例: +33612345678</string>
     <!-- General Blocking Settings -->
     <string name="pref_enable_blocking_title">ブロックを有効化</string>
     <string name="pref_enable_blocking_summary">通話のブロック機能を有効化または無効化します</string>
-    <!-- Blocked and Whitelisted Numbers -->
-    <string name="pref_blocked_numbers_list_title">ブロック済み電話番号</string>
-    <string name="pref_blocked_numbers_list_summary">ブロックする電話番号を入力 (一行ごと)</string>
-    <string name="pref_blocked_numbers_list_error">無効な番号です。数字と「+」のみを使用してください。</string>
-    <string name="pref_blocked_numbers_list_example">例: +33612345678, 612345678。一行ごと。</string>
-
-    <string name="pref_whitelisted_numbers_list_title">許可する電話番号</string>
-    <string name="pref_whitelisted_numbers_list_summary">許可する電話番号を入力 (一行ごと)</string>
-    <string name="pref_whitelisted_numbers_list_error">無効な番号です。数字と「+」のみを使用してください。</string>
-    <string name="pref_whitelisted_numbers_list_example">例: +33612345678, 612345678。一行ごと。</string>
     <!-- API Unknownphone -->
     <string name="pref_filter_lista_spam_title">Unknownphone API</string>
-    <string name="pref_filter_lista_spam_summary">(推奨) unknownphone.com API にリストされているスパムからの着信をブロックします</string>
+    <string name="pref_filter_lista_spam_summary">(推奨) unknownphone.com API にリストされている迷惑電話の着信をブロックします</string>
     <string name="pref_filter_lista_spam_api_language_title">unknownphone.com API の言語</string>
     <string name="pref_filter_lista_spam_api_language_summary">unknownphone.com API で検索する言語を選択してください (結果に影響)</string>
     <string name="pref_renew_api_key_title">API キーを更新</string>
-    <string name="pref_renew_api_key_summary">unknownphone.com の新しい API キーをリクエストしてください。API リクエストが失敗している場合のみを使用してください。このオプションを乱用するとUnknownphone からのバンの対象になる場合があります。</string>
-    <string name="pref_renew_api_key_success">API キーが正常に更新されました</string>
+    <string name="pref_renew_api_key_summary">新しい unknownphone.com API キーを要求します。API 要求が失敗する場合のみ使用してください。このオプションを悪用すると Unknownphone から BAN される可能性があります。</string>
+    <string name="pref_renew_api_key_success">API キーを更新しました</string>
     <string name="pref_renew_api_key_failure">API キーの更新に失敗しました</string>
+    <string name="pref_update_dangerous_list_title">危険な電話番号のリストを更新</string>
+    <string name="pref_update_dangerous_list_summary">unknownphone.com から地域の危険な電話番号のデータベースを手動で更新します。毎日午前 2 時に自動で更新されます。</string>
+    <string name="pref_update_dangerous_list_success">危険な電話番号のリストを更新しました</string>
+    <string name="pref_update_dangerous_list_failure">危険な電話番号のリストの更新に失敗しました</string>
     <!-- API Tellows -->
     <string name="pref_filter_tellows_title">Tellows API</string>
-    <string name="pref_filter_tellows_summary">(推奨) Tellows API にリストされているスパムからの着信をブロックします</string>
+    <string name="pref_filter_tellows_summary">(推奨) Tellows API にリストされている迷惑電話の着信をブロックします</string>
     <string name="pref_filter_tellows_api_country_title">Tellows API の国</string>
     <string name="pref_filter_tellows_api_country_summary">Tellows API で検索する国を選択してください (結果に影響)</string>
     <!-- API Truecaller -->
     <string name="pref_filter_truecaller_title">Truecaller API</string>
-    <string name="pref_filter_truecaller_summary">(推奨) Truecaller API によって識別されたスパムからの着信をブロックします</string>
+    <string name="pref_filter_truecaller_summary">(推奨) Truecaller API によって識別された迷惑電話の着信をブロックします</string>
     <string name="pref_filter_truecaller_api_country_title">Truecaller API の国</string>
     <string name="pref_filter_truecaller_api_country_summary">Truecaller API で検索する国を選択してください (結果に影響)</string>
     <!-- Other Blocking Options -->
@@ -100,7 +113,7 @@
     <string name="pref_block_stir_shaken_risk_title">STIR/SHAKEN を確認する</string>
     <string name="pref_block_stir_shaken_risk_summary">STIR/SHAKEN システムによって不正の可能性があるとマークされた着信をブロックします (Android 11 以降のみ対応、一部の国とキャリアで利用可能)</string>
     <string name="pref_mute_instead_of_block_title">ブロックの代わりにミュートにする</string>
-    <string name="pref_mute_instead_of_block_summary">スパムからの着信を完全にブロックせずにミュートにします</string>
+    <string name="pref_mute_instead_of_block_summary">迷惑電話の着信を完全にブロックせずにミュートにします</string>
     <!-- Notifications -->
     <string name="pref_show_notification_title">ブロック時に通知を表示する</string>
     <string name="pref_show_notification_summary">着信がブロックされたときに通知を表示します</string>
@@ -120,7 +133,7 @@
     <string name="blocking_disabled">設定で着信のブロックが無効化されています</string>
     <string name="block_stir_shaken_risk">STIR/SHAKEN - なりすましの可能性がある着信</string>
     <string name="block_hidden_number">電話番号が非表示</string>
-    <string name="block_spam_number">スパムとして報告</string>
+    <string name="block_spam_number">迷惑電話として報告</string>
     <string name="block_international_call">国際電話</string>
     <string name="block_pattern_match">パターン一致</string>
     <string name="block_already_blocked_number">ブロック済みの電話番号</string>
@@ -139,12 +152,12 @@
     <string name="report_label">理由を説明してください</string>
     <string name="report_hint">簡単な説明</string>
     <string name="where_to_report">どこに報告しますか？</string>
-    <string name="report_spam">スパム</string>
-    <string name="report_not_spam">スパムではない</string>
+    <string name="report_spam">迷惑電話</string>
+    <string name="report_not_spam">迷惑電話ではない</string>
     <string name="accept">送信</string>
     <string name="cancel">キャンセル</string>
     <string name="report_validation_message">少なくとも 2 つの単語と 5 文字を含める必要があります。</string>
-    <string name="report_radio_validation">スパムかどうかを選択してください。</string>
+    <string name="report_radio_validation">迷惑電話かどうかを選択してください。</string>
     <string name="report_success_prefix">報告先</string>
     <string name="and">と</string>
     <string name="report_failure">報告を送信できませんでした</string>

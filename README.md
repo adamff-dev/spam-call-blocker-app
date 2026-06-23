@@ -1,10 +1,12 @@
-# Call Blocker App
+# Spam Call Blocker
 
-Call Blocker App is a Kotlin-powered tool that empowers you to block unwanted calls using a combination of real-time API checks with multi-country support, and other methods for effective call filtering.
+**Language:** **English** | [日本語](./README_ja-JP.md)
+
+Spam Call Blocker is a Kotlin-powered tool that empowers you to block unwanted calls using a combination of real-time API checks with multi-country support, and other methods for effective call filtering.
 
 ## Screenshots
 
-Here are some screenshots of the Call Blocker App in action:
+Here are some screenshots of the Spam Call Blocker in action:
 
 <div style="display: flex; gap: 10px;">
   <img src="https://i.imgur.com/g8Ie7zU.png" alt="Main screen" width="300">  

@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.addev.listaspam.preferences.BaseListManagerDialogFragment
@@ -32,6 +34,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        setupWindowInsets()
 
         updateSettingsContainer()
 
@@ -45,6 +48,18 @@ class SettingsActivity : AppCompatActivity() {
 
         importButton.setOnClickListener {
             importFileLauncher.launch(arrayOf("application/json"))
+        }
+    }
+
+    /**
+     * Keeps the content below the status bar and the action bar (and above the navigation bar).
+     * Without it the export/import buttons end up hidden behind the action bar.
+     */
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings_root)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
         }
     }
 

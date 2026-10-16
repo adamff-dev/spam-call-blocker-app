@@ -190,4 +190,17 @@
     <string name="donation_help_development">Помогите поддержать разработку и обслуживание этого приложения!</string>
     <string name="donation_traditional_methods">Поддержка через традиционные методы:</string>
     <string name="donation_crypto_methods">Или если предпочитаете, можете пожертвовать криптовалютами:</string>
+    <string name="list_empty">Пока нет записей</string>
+    <string name="list_entry_hint">Новая запись…</string>
+    <string name="list_add_entry">Добавить запись</string>
+    <string name="list_entry_edit">Изменить</string>
+    <string name="list_entry_delete">Удалить</string>
+    <string name="list_entry_edit_title">Изменить запись</string>
+    <string name="list_entry_duplicate">Запись уже существует</string>
+    <string name="pref_pattern_list_hint">Напр. +331*, *98, 213*134</string>
+    <string name="pref_pattern_exception_list_hint">Напр. +331*, *98, 213*134</string>
+    <string name="pref_blocked_numbers_list_hint">Напр. +33612345678</string>
+    <string name="pref_whitelisted_numbers_list_hint">Напр. +33612345678</string>
+    <string name="pref_listaspam_scraper_country_title">Страна поиска UnknownPhone</string>
+    <string name="pref_listaspam_scraper_country_summary">Использует выбранный региональный справочник; для остальных стран используется международный поиск UnknownPhone</string>
 </resources>

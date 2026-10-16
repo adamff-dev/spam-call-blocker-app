@@ -191,4 +191,17 @@
     <string name="donation_help_development">Aiuta a supportare lo sviluppo e la manutenzione di questa app!</string>
     <string name="donation_traditional_methods">Supporta tramite metodi tradizionali:</string>
     <string name="donation_crypto_methods">Oppure, se preferisci, puoi donare con criptovalute:</string>
+    <string name="list_empty">Nessuna voce</string>
+    <string name="list_entry_hint">Nuova voce…</string>
+    <string name="list_add_entry">Aggiungi voce</string>
+    <string name="list_entry_edit">Modifica</string>
+    <string name="list_entry_delete">Elimina</string>
+    <string name="list_entry_edit_title">Modifica voce</string>
+    <string name="list_entry_duplicate">La voce esiste già</string>
+    <string name="pref_pattern_list_hint">Es. +331*, *98, 213*134</string>
+    <string name="pref_pattern_exception_list_hint">Es. +331*, *98, 213*134</string>
+    <string name="pref_blocked_numbers_list_hint">Es. +33612345678</string>
+    <string name="pref_whitelisted_numbers_list_hint">Es. +33612345678</string>
+    <string name="pref_listaspam_scraper_country_title">Paese di ricerca di UnknownPhone</string>
+    <string name="pref_listaspam_scraper_country_summary">Usa la directory regionale selezionata; gli altri paesi usano la ricerca internazionale di UnknownPhone</string>
 </resources>

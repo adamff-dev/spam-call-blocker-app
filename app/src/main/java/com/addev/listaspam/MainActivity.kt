@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
     private lateinit var intentLauncher: ActivityResultLauncher<Intent>
     private var permissionDeniedDialog: AlertDialog? = null
     private var roleUnavailableToastShown = false
+    private var roleRequested = false
     private var callLogAdapter: CallLogAdapter? = null
     private var recyclerView: RecyclerView? = null
 
@@ -282,7 +283,10 @@ class MainActivity : AppCompatActivity(), CallLogAdapter.OnItemChangedListener {
             }
             return
         }
-        if (!roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
+        // Ask only once: onResume runs again after the role dialog closes, so without this
+        // the dialog would reopen forever if the user declines it.
+        if (!roleRequested && !roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
+            roleRequested = true
             val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
             intentLauncher.launch(intent)
             showToast(this, getString(R.string.call_screening_role_prompt), Toast.LENGTH_LONG)

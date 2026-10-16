@@ -8,6 +8,13 @@
         <item name="colorSecondary">@color/white</item>
         <item name="colorOnSecondary">@color/black</item>
         <item name="android:windowBackground">@color/darkBackground</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.ListaSpam.MaterialAlertDialog</item>
+    </style>
+
+    <!-- colorPrimary is black in the dark theme, which made the dialog buttons invisible -->
+    <style name="ThemeOverlay.ListaSpam.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
     </style>
     <style name="PopupMenuStyle" parent="@style/Widget.AppCompat.PopupMenu">
     </style>

@@ -99,8 +99,20 @@ class BaseListManagerDialogFragment : PreferenceDialogFragmentCompat() {
 
     override fun onDialogClosed(positiveResult: Boolean) {
         if (positiveResult) {
+            addPendingInput()
             listPref.saveEntries(entries)
         }
+    }
+
+    /**
+     * Adds the text typed in the input field that the user did not confirm with the "+" button,
+     * so it is not silently lost when pressing OK.
+     */
+    private fun addPendingInput() {
+        if (!::inputField.isInitialized) return
+        val text = inputField.text.toString().trim()
+        if (text.isEmpty() || !listPref.validator.validate(text)) return
+        entries.addAll(listPref.validator.cleanInput(text).filter { it !in entries })
     }
 
     private fun updateEmptyState(emptyText: TextView) {

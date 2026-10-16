@@ -31,12 +31,14 @@ fun getCallLogs(context: Context): List<CallLogEntry> {
         val typeIndex = it.getColumnIndex(CallLog.Calls.TYPE)
         val dateIndex = it.getColumnIndex(CallLog.Calls.DATE)
         val durationIndex = it.getColumnIndex(CallLog.Calls.DURATION)
+        if (typeIndex < 0 || dateIndex < 0) return callLogs
 
         while (it.moveToNext()) {
-            val number = it.getString(numberIndex)
+            // Hidden/private callers are stored with a null number on many devices
+            val number = if (numberIndex >= 0) it.getString(numberIndex) ?: "" else ""
             val type = it.getInt(typeIndex)
             val date = Date(it.getLong(dateIndex))
-            val duration = it.getLong(durationIndex)
+            val duration = if (durationIndex >= 0) it.getLong(durationIndex) else 0L
             callLogs.add(CallLogEntry(number, type, date, duration))
         }
     }

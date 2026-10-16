@@ -88,7 +88,8 @@ class CallLogAdapter(
         private val overflowMenuButton = itemView.findViewById<ImageButton>(R.id.overflowMenuButton)
 
         fun bind(callLog: CallLogEntry, isBlocked: Boolean, isWhitelisted: Boolean = false) {
-            val number = callLog.number ?: "Unknown number"
+            val number = callLog.number
+            val unknownLabel = context.getString(R.string.unknown_value)
             val contactName = getContactName(context, number)
             val textToShow = if (isBlocked) {
                 val displayText = when {
@@ -98,9 +99,9 @@ class CallLogAdapter(
                 }
                 context.getString(R.string.blocked_text_format, displayText)
             } else if (isWhitelisted) {
-                context.getString(R.string.whitelisted_text_format, contactName ?: number)
+                context.getString(R.string.whitelisted_text_format, contactName ?: number.ifBlank { unknownLabel })
             } else {
-                contactName ?: number
+                contactName ?: number.ifBlank { unknownLabel }
             }
             numberTextView.text = textToShow
             dateTextView.text = formatter.format(

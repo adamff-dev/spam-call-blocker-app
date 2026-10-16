@@ -1,5 +1,6 @@
 package com.addev.listaspam.service
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -67,13 +68,26 @@ class UpdateChecker(
     }
 
     private fun isUpdateAvailable(current: String, latest: String): Boolean {
-        val currentClean = current.trimStart('v', 'V')
-        val latestClean = latest.trimStart('v', 'V')
-        return currentClean != latestClean
+        val currentParts = versionParts(current)
+        val latestParts = versionParts(latest)
+        if (currentParts.isEmpty() || latestParts.isEmpty()) {
+            return current.trimStart('v', 'V') != latest.trimStart('v', 'V')
+        }
+        for (i in 0 until maxOf(currentParts.size, latestParts.size)) {
+            val c = currentParts.getOrElse(i) { 0 }
+            val l = latestParts.getOrElse(i) { 0 }
+            if (l != c) return l > c
+        }
+        return false
     }
+
+    private fun versionParts(version: String): List<Int> =
+        version.trimStart('v', 'V').split('.').map { it.takeWhile(Char::isDigit).toIntOrNull() ?: return emptyList() }
 
     private fun showAlert(title: String, message: String, positiveAction: (() -> Unit)? = null) {
         Handler(Looper.getMainLooper()).post {
+            // The check runs in the background: the activity may be gone by now
+            if (context is Activity && (context.isFinishing || context.isDestroyed)) return@post
             AlertDialog.Builder(context).setTitle(title).setMessage(message)
                 .setPositiveButton(R.string.aceptar) { _, _ -> positiveAction?.invoke() }
                 .setNegativeButton(R.string.cancelar, null).show()

@@ -66,54 +66,6 @@ class SpamUtils {
     }
 
     /**
-     * Checks if a number matches a pattern that may contain wildcards.
-     * Pattern examples:
-     * - +33162* (starts with +33162)
-     * - *98 (ends with 98)
-     * - 213*134 (starts with 213 and ends with 134)
-     * - *454* (contains 454 anywhere in between)
-     *
-     * @param number The phone number to check
-     * @param pattern The pattern to match against
-     * @return true if the number matches the pattern
-     */
-    private fun matchesPattern(number: String, pattern: String): Boolean {
-        if (pattern.isEmpty() || number.isEmpty()) return false
-
-        val parts = pattern.split("*")
-        // If there are no wildcards, do exact match
-        if (parts.size == 1) {
-            return number == pattern
-        }
-
-        var idx = 0
-        var currentIndex = 0
-
-        // If pattern starts with wildcard, skip empty prefix
-        if (parts.first().isNotEmpty()) {
-            if (!number.startsWith(parts.first())) return false
-            currentIndex += parts.first().length
-        }
-
-        // If pattern ends with wildcard, skip empty suffix
-        val lastIndex = parts.size - 1
-        if (parts.last().isNotEmpty()) {
-            if (!number.endsWith(parts.last())) return false
-        }
-
-        // Check all middle parts (must appear in order)
-        for (i in 1 until lastIndex) {
-            val part = parts[i]
-            if (part.isEmpty()) continue
-            val foundIdx = number.indexOf(part, currentIndex)
-            if (foundIdx == -1) return false
-            currentIndex = foundIdx + part.length
-        }
-
-        return true
-    }
-
-    /**
      * Checks if a given phone number is spam by checking local blocklist and online databases.
      *
      * @param context The application context.
@@ -134,7 +86,8 @@ class SpamUtils {
                 return@launch
             }
 
-            val number = if (details != null) getRawPhoneNumber(details) else phoneNumber;
+            val number = if (details != null) getRawPhoneNumber(details) else phoneNumber
+            val region = CountryLanguageUtils.getSimCountry(context).uppercase()
 
             if (number.isNullOrBlank()) {
                 if (shouldBlockHiddenNumbers(context)) {
@@ -162,7 +115,7 @@ class SpamUtils {
             // Check pattern whitelisting first - if matches exception, allow
             if (isPatternWhitelistingEnabled(context)) {
                 val whitelistedPatterns = getWhitelistedPatterns(context)
-                if (whitelistedPatterns.any { matchesPattern(number, it) }) {
+                if (whitelistedPatterns.any { NumberMatcher.matchesPattern(number, it, region) }) {
                     callback(false)
                     return@launch
                 }
@@ -200,7 +153,7 @@ class SpamUtils {
 
             if (isPatternBlockingEnabled(context)) {
                 val patterns = getBlockedPatterns(context)
-                if (patterns.any { matchesPattern(number, it) }) {
+                if (patterns.any { NumberMatcher.matchesPattern(number, it, region) }) {
                     handleSpamNumber(
                         context,
                         number,
@@ -351,9 +304,9 @@ class SpamUtils {
         val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
         return try {
-            val parsedNumber = phoneNumberUtil.parse(phoneNumber, null) // Safe parsing
-
             val simCountry = CountryLanguageUtils.getSimCountry(context).uppercase()
+            // Numbers without "+" are national numbers of the SIM country
+            val parsedNumber = phoneNumberUtil.parse(phoneNumber, simCountry)
 
             val countryCode = phoneNumberUtil.getCountryCodeForRegion(simCountry)
             parsedNumber.countryCode != countryCode // True if international
@@ -393,6 +346,17 @@ class SpamUtils {
             return false
         }
 
+        // The contact may be stored in a different format than the incoming number
+        // (e.g. with or without country code), so try every equivalent writing.
+        val region = CountryLanguageUtils.getSimCountry(context).uppercase()
+        val candidates = (listOf(phoneNumber) + NumberMatcher.variants(phoneNumber, region))
+            .filter { it.isNotEmpty() && !it.startsWith("00") }
+            .distinct()
+
+        return candidates.any { candidate -> isContactNumber(context, candidate) }
+    }
+
+    private fun isContactNumber(context: Context, phoneNumber: String): Boolean {
         val uri = Uri.withAppendedPath(
             ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
             Uri.encode(phoneNumber)

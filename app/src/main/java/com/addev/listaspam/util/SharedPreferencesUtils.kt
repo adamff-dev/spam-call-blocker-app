@@ -58,7 +58,7 @@ fun setListaSpamScraperCountry(context: Context, countryCode: String) =
     setStringPref(context, "pref_listaspam_scraper_country", countryCode.uppercase())
 
 fun shouldFilterWithTellowsApi(context: Context): Boolean =
-    getBooleanPref(context, "pref_filter_tellows_api", true)
+    getBooleanPref(context, "pref_tellows_api", true)
 
 fun shouldFilterWithTruecallerApi(context: Context): Boolean =
     getBooleanPref(context, "pref_truecaller_api", true)
